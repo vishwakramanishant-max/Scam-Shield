@@ -234,11 +234,3 @@ tests/         dataset.py  test_detection.py  test_modules.py  test_app.py  metr
 sample_data/   synthetic demo files
 docs/          test report, security checklist, demo script, architecture, img/
 ```
-
-## 📄 License
-
-Add a license before publishing (for example MIT, which GitHub can add when you create the repo). Until then, all rights are reserved by the authors.
-
-<div align="center">
-<sub>Scam Shield is a decision-support tool. It gives risk indicators, not proof.</sub>
-</div>
