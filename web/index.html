@@ -1,0 +1,955 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Scam Shield</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout: sticky header + scrolling tab strip, one card stack per tab, built for a thumb on a 390px screen.
+   Palette: pine-green accent on a green-grey neutral; severity colours are separate from the accent. */
+:root{
+  --bg:#F1F5F3;--surface:#FFFFFF;--ink:#12201D;--mut:#55665F;--line:#D9E2DD;--accent:#0B6B5D;--accent-ink:#FFFFFF;
+  --hi:#B42318;--hib:#FDE7E4;--me:#9A4405;--meb:#FDEFD2;--lo:#0A6B3F;--lob:#DCF4E5;--un:#475467;--unb:#E8ECEA;
+  --code:#0F1A17;--code-ink:#DCEBE5;
+  --f-body:"Inter","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-head:"Space Grotesk","Noto Sans Devanagari",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1412;--surface:#141F1C;--ink:#E7F1ED;--mut:#9BAEA7;--line:#26352F;--accent:#43C4AC;--accent-ink:#052019;
+  --hi:#FF9187;--hib:#3A1815;--me:#F4B862;--meb:#3A2B11;--lo:#74DCA5;--lob:#12301F;--un:#AAB7C0;--unb:#222C30;
+  --code:#091210;--code-ink:#CFE3DB;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1412;--surface:#141F1C;--ink:#E7F1ED;--mut:#9BAEA7;--line:#26352F;--accent:#43C4AC;--accent-ink:#052019;
+  --hi:#FF9187;--hib:#3A1815;--me:#F4B862;--meb:#3A2B11;--lo:#74DCA5;--lob:#12301F;--un:#AAB7C0;--unb:#222C30;
+  --code:#091210;--code-ink:#CFE3DB;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:12px 0 0}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font:700 20px/1.1 var(--f-head);letter-spacing:-.01em;display:flex;align-items:center;gap:8px;min-width:0}
+.brand svg{flex:none}
+.brand small{display:block;font:500 11px/1.3 var(--f-body);color:var(--mut);letter-spacing:.02em}
+.tools{display:flex;gap:8px;align-items:center;flex:none}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px var(--f-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 0 10px;scrollbar-width:none;border-bottom:1px solid var(--line);margin-top:8px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{flex:none;border:0;background:transparent;color:var(--mut);font:600 14px var(--f-body);padding:8px 13px;border-radius:10px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+main{padding-top:16px;display:grid;gap:14px}
+.panel[hidden]{display:none}
+.panel{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.card h2{font:700 17px/1.25 var(--f-head);margin:0 0 6px;text-wrap:balance}
+.card h3{font:600 12px/1.3 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:16px 0 6px}
+.muted{color:var(--mut)}.small{font-size:12.5px}
+p{margin:6px 0}
+label.fld{display:block;font-weight:500;margin:10px 0 4px}
+input[type=text],input[type=number],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{resize:vertical;min-height:96px}
+textarea.mono,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+input[type=file]{width:100%;font:inherit;padding:8px 0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;font:600 14px var(--f-body);cursor:pointer;min-height:44px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.warn{color:var(--hi);border-color:var(--hi)}
+.btn.sm{min-height:36px;padding:6px 10px;font-size:13px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font:600 12px/1.6 var(--f-body);white-space:nowrap}
+.p-high{background:var(--hib);color:var(--hi)}.p-medium{background:var(--meb);color:var(--me)}
+.p-low{background:var(--lob);color:var(--lo)}.p-unk{background:var(--unb);color:var(--un)}
+.result{border-left:5px solid var(--un);background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:12px}
+.result.high{border-color:var(--hi)}.result.medium{border-color:var(--me)}.result.low{border-color:var(--lo)}
+.result ul{margin:6px 0 6px 18px;padding:0}.result li{margin:3px 0}
+.rid{font-size:11px;color:var(--mut);margin-left:6px}
+.stat{display:flex;gap:22px;margin-top:12px}.stat b{display:block;font:700 28px/1 var(--f-head)}.stat span{font-size:12px;color:var(--mut)}
+.list{display:grid;gap:8px;margin-top:10px}
+.item{border:1px solid var(--line);border-left-width:5px;border-radius:10px;padding:9px 12px;background:var(--surface);min-width:0;overflow-wrap:anywhere}
+.item.high{border-left-color:var(--hi)}.item.medium{border-left-color:var(--me)}.item.low{border-left-color:var(--lo)}.item.ack{opacity:.55}
+.item .meta{font-size:12px;color:var(--mut)}
+.comp{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.comp:last-child{border:0}.comp div{min-width:0}.comp .d{font-size:12.5px;color:var(--mut)}
+.banner{background:var(--meb);color:var(--me);border-radius:10px;padding:8px 12px;font-weight:600;font-size:13px;margin-bottom:10px}
+.note{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--mut);margin-top:12px}
+pre.diff{background:var(--code);color:var(--code-ink);border-radius:10px;padding:10px 12px;overflow-x:auto;font-size:12px;margin:8px 0}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.chk input{margin-top:4px;width:18px;height:18px;flex:none}
+svg.chart{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;margin:10px 0}
+.foot{margin-top:6px;font-size:12px;color:var(--mut)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:600;font-size:13px;z-index:40;max-width:90vw}
+@media (prefers-reduced-motion:no-preference){.panel{animation:in .18s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="bar">
+    <div class="brand">
+      <svg width="26" height="28" viewBox="0 0 26 28" aria-hidden="true"><path d="M13 1.5 2.5 5.4v8.1c0 6.4 4.4 11.1 10.5 13 6.1-1.900 10.500-6.600 10.500-13V5.400L13 1.500Z" fill="var(--accent)"/><path d="m8.300 14 3.300 3.300 6.200-6.600" fill="none" stroke="var(--accent-ink)" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Scam Shield<small data-en="Detect · Explain · Recommend · Record" data-hi="पहचानें · समझाएँ · सुझाएँ · दर्ज करें"></small></span>
+    </div>
+    <div class="tools">
+      <button class="chip" id="voiceBtn" aria-pressed="false" data-en="Voice" data-hi="आवाज़"></button>
+      <button class="chip" id="langBtn" aria-label="Switch language">हिंदी</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</header>
+
+<main>
+<!-- OVERVIEW -->
+<section class="panel" id="p-overview">
+  <div class="card">
+    <h2 data-en="Readiness" data-hi="तैयारी"></h2>
+    <div id="overall"></div>
+    <div id="components"></div>
+    <p class="small muted" data-en="Built only from checks you have run. A check that has not run shows Not assessed. It is not a claim that the business is secure." data-hi="केवल उन जाँचों से बनता है जो आपने चलाई हैं। जो जाँच नहीं चली उसे 'आकलन नहीं' दिखता है। यह सुरक्षित होने का दावा नहीं है।"></p>
+  </div>
+  <div class="card">
+    <h2 data-en="Try it in one tap" data-hi="एक टैप में आज़माएँ"></h2>
+    <p class="muted" data-en="Demo data is made up: sample QR text, fake keys, invented sales and a simulated machine. Nothing leaves your phone." data-hi="डेमो डेटा बनावटी है: नमूना QR टेक्स्ट, नकली कुंजियाँ, बनावटी बिक्री और सिम्युलेटेड मशीन। कुछ भी आपके फ़ोन से बाहर नहीं जाता।"></p>
+    <div class="row">
+      <button class="btn primary" id="runAll" data-en="Run all demo checks" data-hi="सभी डेमो जाँच चलाएँ"></button>
+      <button class="btn warn" id="resetAll" data-en="Reset" data-hi="रीसेट"></button>
+    </div>
+    <div class="stat"><div><b id="nHigh">0</b><span data-en="open high alerts" data-hi="खुले गंभीर अलर्ट"></span></div><div><b id="nAll">0</b><span data-en="open alerts" data-hi="खुले अलर्ट"></span></div></div>
+  </div>
+  <div class="card"><h2 data-en="Latest alerts" data-hi="ताज़ा अलर्ट"></h2><div class="list" id="latest"></div></div>
+  <div class="note" data-en="This web version runs every check inside your browser on sample or pasted data. The Linux version scans real folders and the real login log in the background, and also reviews app (APK) files." data-hi="यह वेब संस्करण हर जाँच आपके ब्राउज़र में नमूना या चिपकाए डेटा पर चलाता है। Linux संस्करण असली फ़ोल्डर और असली लॉगिन लॉग को बैकग्राउंड में जाँचता है और ऐप (APK) फ़ाइलें भी देखता है।"></div>
+</section>
+
+<!-- MESSAGES -->
+<section class="panel" id="p-messages" hidden>
+  <div class="card">
+    <h2 data-en="Check a message, payment request or link" data-hi="संदेश, भुगतान अनुरोध या लिंक जाँचें"></h2>
+    <p class="small muted" data-en="Paste the text of an SMS or WhatsApp message. It is analysed on your phone and not stored." data-hi="SMS या WhatsApp संदेश का टेक्स्ट चिपकाएँ। विश्लेषण आपके फ़ोन पर होता है और सेव नहीं होता।"></p>
+    <label class="fld" for="msg" data-en="Message or link" data-hi="संदेश या लिंक"></label>
+    <textarea id="msg" maxlength="5000" placeholder="Paste here"></textarea>
+    <div class="row">
+      <button class="btn primary" id="msgGo" data-en="Analyse" data-hi="जाँचें"></button>
+      <button class="btn" id="msgScam" data-en="Sample scam" data-hi="नमूना ठगी"></button>
+      <button class="btn" id="msgOk" data-en="Sample genuine" data-hi="नमूना असली"></button>
+    </div>
+    <div id="msgOut"></div>
+  </div>
+</section>
+
+<!-- QR & PAYMENTS -->
+<section class="panel" id="p-qr" hidden>
+  <div class="card">
+    <h2 data-en="1. Your real QR" data-hi="1. आपका असली QR"></h2>
+    <label class="fld" for="qUpi" data-en="UPI ID" data-hi="UPI ID"></label>
+    <input type="text" id="qUpi" autocapitalize="none" autocomplete="off" spellcheck="false">
+    <label class="fld" for="qName" data-en="Payee name shown in your payment app" data-hi="आपके पेमेंट ऐप में दिखने वाला नाम"></label>
+    <input type="text" id="qName" autocomplete="off">
+    <div class="row"><button class="btn" id="qSave" data-en="Save" data-hi="सेव करें"></button></div>
+  </div>
+  <div class="card">
+    <h2 data-en="2. Scan a QR to compare" data-hi="2. तुलना के लिए QR स्कैन करें"></h2>
+    <p class="small muted" data-en="Take a photo of the QR (opens your camera) or choose a screenshot. Reading happens on your phone." data-hi="QR की फ़ोटो लें (कैमरा खुलेगा) या स्क्रीनशॉट चुनें। पढ़ना आपके फ़ोन पर होता है।"></p>
+    <input type="file" id="qFile" accept="image/*" capture="environment" aria-label="QR photo">
+    <label class="fld" for="qText" data-en="…or paste the QR text" data-hi="…या QR का टेक्स्ट चिपकाएँ"></label>
+    <textarea id="qText" class="mono" style="min-height:64px" placeholder="upi://pay?pa=…"></textarea>
+    <div class="row"><button class="btn primary" id="qCheck" data-en="Compare" data-hi="तुलना करें"></button></div>
+    <h3 data-en="Try a sample QR" data-hi="नमूना QR आज़माएँ"></h3>
+    <div class="row" style="margin-top:0">
+      <button class="btn sm" data-qs="genuine" data-en="Genuine" data-hi="असली"></button>
+      <button class="btn sm" data-qs="swapped" data-en="Look-alike swap" data-hi="मिलता-जुलता बदला"></button>
+      <button class="btn sm" data-qs="other" data-en="Different payee" data-hi="दूसरा पाने वाला"></button>
+      <button class="btn sm" data-qs="short" data-en="Short link" data-hi="छोटा लिंक"></button>
+      <button class="btn sm" data-qs="name" data-en="Name differs" data-hi="नाम अलग"></button>
+    </div>
+    <div id="qOut"></div>
+  </div>
+  <div class="card">
+    <h2 data-en="3. Sales and statement" data-hi="3. बिक्री और स्टेटमेंट"></h2>
+    <p class="small muted" data-en="Compares your recorded sales with a statement CSV (txn_id,timestamp,amount,status). The result only says what that file contains." data-hi="आपकी दर्ज बिक्री की तुलना स्टेटमेंट CSV (txn_id,timestamp,amount,status) से करता है। नतीजा सिर्फ़ यह बताता है कि उस फ़ाइल में क्या है।"></p>
+    <div class="row"><button class="btn primary" id="loadDemo" data-en="Load demo sales + statement" data-hi="डेमो बिक्री + स्टेटमेंट लोड करें"></button><button class="btn" id="recon" data-en="Reconcile" data-hi="मिलान करें"></button></div>
+    <label class="fld" for="csvFile" data-en="Or choose your own statement CSV" data-hi="या अपनी स्टेटमेंट CSV चुनें"></label>
+    <input type="file" id="csvFile" accept=".csv,text/csv">
+    <div id="salesOut"></div>
+  </div>
+  <div class="card">
+    <h2 data-en="4. Customer shows a 'payment successful' screen" data-hi="4. ग्राहक 'भुगतान सफल' स्क्रीन दिखाता है"></h2>
+    <label class="chk"><input type="checkbox" id="vApp"><span data-en="I see the credit inside MY payment app or bank SMS" data-hi="मैं अपने पेमेंट ऐप या बैंक SMS में क्रेडिट देख रहा/रही हूँ"></span></label>
+    <label class="chk"><input type="checkbox" id="vAmt"><span data-en="Amount matches the sale" data-hi="राशि बिक्री से मेल खाती है"></span></label>
+    <label class="chk"><input type="checkbox" id="vTxn"><span data-en="Transaction ID is visible in my app" data-hi="लेन-देन ID मेरे ऐप में दिखती है"></span></label>
+    <label class="chk"><input type="checkbox" id="vShot"><span data-en="I only have the customer's screenshot" data-hi="मेरे पास सिर्फ़ ग्राहक का स्क्रीनशॉट है"></span></label>
+    <div class="row"><button class="btn primary" id="vGo" data-en="Get status" data-hi="स्थिति देखें"></button></div>
+    <div id="vOut"></div>
+  </div>
+</section>
+
+<!-- CODE & LOGS -->
+<section class="panel" id="p-linux" hidden>
+  <div class="card">
+    <h2 data-en="Code and data leak scan" data-hi="कोड और डेटा लीक स्कैन"></h2>
+    <p class="small muted" data-en="Paste the contents of one file. Values are masked in every result. On Linux the full app scans whole folders." data-hi="किसी एक फ़ाइल की सामग्री चिपकाएँ। हर नतीजे में मान छिपे रहते हैं। Linux ऐप पूरे फ़ोल्डर स्कैन करता है।"></p>
+    <label class="fld" for="fName" data-en="File name" data-hi="फ़ाइल का नाम"></label>
+    <input type="text" id="fName" value="billing_app.py" autocapitalize="none" spellcheck="false">
+    <label class="fld" for="fText" data-en="File contents" data-hi="फ़ाइल की सामग्री"></label>
+    <textarea id="fText" class="mono" style="min-height:150px"></textarea>
+    <div class="row">
+      <button class="btn primary" id="scanGo" data-en="Scan" data-hi="स्कैन करें"></button>
+      <button class="btn" id="scanPy" data-en="Sample .py" data-hi="नमूना .py"></button>
+      <button class="btn" id="scanEnv" data-en="Sample .env" data-hi="नमूना .env"></button>
+    </div>
+    <div id="scanOut"></div>
+  </div>
+  <div class="card">
+    <h2 data-en="Failed-login monitor" data-hi="असफल लॉगिन निगरानी"></h2>
+    <p class="small muted" data-en="Paste lines from a Linux auth log, or generate made-up lines with the buttons. A single mistyped password is never treated as an attack." data-hi="Linux auth लॉग की पंक्तियाँ चिपकाएँ, या बटनों से बनावटी पंक्तियाँ बनाएँ। एक गलत पासवर्ड को हमला नहीं माना जाता।"></p>
+    <textarea id="logText" class="mono" style="min-height:130px" placeholder="Nov 14 10:00:01 host sshd[1]: Failed password for admin from 203.0.113.45 port 40010 ssh2"></textarea>
+    <div class="row">
+      <button class="btn primary" id="logGo" data-en="Check log" data-hi="लॉग जाँचें"></button>
+      <button class="btn sm" data-lg="brute" data-en="Repeated failures" data-hi="बार-बार विफलता"></button>
+      <button class="btn sm" data-lg="spray" data-en="Many accounts" data-hi="कई खाते"></button>
+      <button class="btn sm" data-lg="success_after" data-en="Success after failures" data-hi="विफलता के बाद सफल"></button>
+      <button class="btn sm" data-lg="benign" data-en="One typo" data-hi="एक गलती"></button>
+    </div>
+    <div id="logOut"></div>
+  </div>
+</section>
+
+<!-- FACTORY -->
+<section class="panel" id="p-factory" hidden>
+  <div class="card">
+    <div class="banner" data-en="SIMULATED DATA. Alerts only. This can never control or stop a machine." data-hi="सिम्युलेटेड डेटा। केवल अलर्ट। यह किसी मशीन को नियंत्रित या बंद नहीं कर सकता।"></div>
+    <h2 id="devName">Pump-01 (SIMULATED)</h2>
+    <div class="row">
+      <button class="btn" data-tick="normal" data-en="Normal reading" data-hi="सामान्य रीडिंग"></button>
+      <button class="btn" data-tick="overheat" data-en="Overheating" data-hi="अधिक गर्मी"></button>
+      <button class="btn" data-tick="vibration" data-en="Vibration" data-hi="कंपन"></button>
+      <button class="btn" data-tick="heartbeat_loss" data-en="Goes silent" data-hi="शांत हो गया"></button>
+    </div>
+    <label class="chk"><input type="checkbox" id="auto"><span data-en="Stream normal readings every 3 s" data-hi="हर 3 सेकंड में सामान्य रीडिंग भेजें"></span></label>
+    <svg class="chart" id="chart" viewBox="0 0 640 220" role="img" aria-label="Temperature over time"></svg>
+    <div id="iotOut"></div>
+  </div>
+</section>
+
+<!-- CITIZEN -->
+<section class="panel" id="p-citizen" hidden>
+  <div class="card">
+    <h2 data-en="Urgent call from a 'family member'?" data-hi="'परिवार के सदस्य' का आपातकालीन कॉल?"></h2>
+    <p class="muted" id="consent"></p>
+    <ol id="steps" style="padding-left:20px;margin:8px 0"></ol>
+    <h3 data-en="Quick self-check" data-hi="त्वरित स्व-जाँच"></h3>
+    <div id="questions"></div>
+    <div class="row"><button class="btn primary" id="vcGo" data-en="Check" data-hi="जाँचें"></button></div>
+    <div id="vcOut"></div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section class="panel" id="p-alerts" hidden>
+  <div class="card">
+    <h2 data-en="Alerts and history" data-hi="अलर्ट और इतिहास"></h2>
+    <div class="row" style="margin-top:6px">
+      <select id="fSev" style="width:auto"><option value="" data-en="All severities" data-hi="सभी गंभीरता"></option><option value="high" data-en="High" data-hi="गंभीर"></option><option value="medium" data-en="Medium" data-hi="मध्यम"></option><option value="low" data-en="Low" data-hi="कम"></option></select>
+      <select id="fOpen" style="width:auto"><option value="" data-en="All" data-hi="सभी"></option><option value="open" data-en="Open only" data-hi="केवल खुले"></option></select>
+      <button class="btn sm" id="copyCsv" data-en="Copy as CSV" data-hi="CSV कॉपी करें"></button>
+    </div>
+    <div class="list" id="alertList"></div>
+  </div>
+</section>
+</main>
+<p class="foot" data-en="Scam Shield is a decision-support tool. It gives risk indicators, not proof. It does not listen to calls, read your messages, confirm bank settlement or control machinery." data-hi="Scam Shield निर्णय-सहायक उपकरण है। यह जोखिम संकेत देता है, सबूत नहीं। यह कॉल नहीं सुनता, आपके संदेश नहीं पढ़ता, बैंक निपटान की पुष्टि नहीं करता और मशीनें नियंत्रित नहीं करता।"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+let LANG = "en";
+try { LANG = localStorage.getItem("ss_lang") || "en"; } catch (e) {}
+const T = (en, hi) => (LANG === "hi" && hi) ? hi : en;
+const pad = n => String(n).padStart(2, "0");
+const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const MIN = 60000;
+
+/* ======================= URL RISK ======================= */
+const SHORTENERS = new Set(["bit.ly","tinyurl.com","t.co","goo.gl","cutt.ly","rb.gy","is.gd","tiny.cc","shorturl.at","ow.ly","rebrand.ly","buff.ly"]);
+const BAD_TLDS = new Set(["xyz","top","tk","ml","ga","cf","gq","click","work","icu","buzz","monster","cyou"]);
+const SLD2 = new Set(["co.in","org.in","gov.in","ac.in","net.in","com.au","co.uk","org.uk","co.nz"]);
+const KEYWORDS = ["kyc","verify","update","secure","login","signin","refund","reward","claim","bonus","lucky","prize","otp","pin","blocked","suspend"];
+const BRANDS = {paytm:["paytm.com","paytm.in"],phonepe:["phonepe.com"],googlepay:["google.com","pay.google.com"],gpay:["google.com","pay.google.com"],
+  bhim:["bhimupi.org.in","npci.org.in"],npci:["npci.org.in"],sbi:["sbi.co.in","onlinesbi.sbi","onlinesbi.com","sbi.bank.in"],hdfc:["hdfcbank.com","hdfc.com"],
+  hdfcbank:["hdfcbank.com"],icici:["icicibank.com","icicilombard.com"],icicibank:["icicibank.com"],axisbank:["axisbank.com"],kotak:["kotak.com","kotakbank.com"],
+  amazon:["amazon.in","amazon.com"],flipkart:["flipkart.com"],whatsapp:["whatsapp.com","wa.me"]};
+const LEET = {"0":"o","1":"l","3":"e","5":"s","$":"s","@":"a"};
+const URL_RE = /(?:https?:\/\/|www\.)[^\s<>"']+|\b(?:bit\.ly|tinyurl\.com|t\.co|goo\.gl|cutt\.ly|rb\.gy|is\.gd|tiny\.cc|shorturl\.at|ow\.ly)\/[^\s<>"']+/gi;
+const IP_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
+function extractUrls(text) {
+  const out = [];
+  for (const m of (text || "").matchAll(URL_RE)) { const u = m[0].replace(/[.,;:!?)\]}>'"]+$/, ""); if (u && !out.includes(u)) out.push(u); }
+  return out.slice(0, 10);
+}
+function editDist(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  let prev = Array.from({length: b.length + 1}, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur.push(Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] !== b[j - 1] ? 1 : 0)));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function registrable(host) {
+  const l = host.split(".");
+  if (l.length >= 3 && SLD2.has(l.slice(-2).join("."))) return l.slice(-3).join(".");
+  return l.length >= 2 ? l.slice(-2).join(".") : host;
+}
+const R = (id, weight, en, hi) => ({id, weight, en, hi});
+function analyzeUrl(url) {
+  const raw = (url || "").trim();
+  const unk = host => ({level: "Unknown", score: 0, reasons: [], host: host || null, url: raw.slice(0, 80)});
+  if (!raw || raw.length > 2048) return unk();
+  let p;
+  try { p = new URL(raw.includes("://") ? raw : "http://" + raw); } catch (e) { return unk(); }
+  const host = (p.hostname || "").toLowerCase();
+  if (!host || (!host.includes(".") && !IP_RE.test(host))) return unk(host);
+  const reasons = [], reg = registrable(host), labels = host.split(".");
+  const official = Object.values(BRANDS).some(d => d.includes(reg));
+  if (raw.toLowerCase().startsWith("http://")) reasons.push(R("L01", 15, "Link is not encrypted (http, not https).", "लिंक एन्क्रिप्टेड नहीं है (http)।"));
+  if (IP_RE.test(host)) reasons.push(R("L02", 40, "Link uses a raw IP address instead of a website name.", "लिंक में वेबसाइट नाम की जगह सीधा IP पता है।"));
+  if (host.includes("xn--") || /[^\x00-\x7f]/.test(host)) reasons.push(R("L03", 40, "Domain uses look-alike (international) characters.", "डोमेन में मिलते-जुलते (अंतरराष्ट्रीय) अक्षर हैं।"));
+  if (SHORTENERS.has(reg)) reasons.push(R("L04", 30, "Shortened link hides the real destination (we did not open it).", "छोटा लिंक असली मंज़िल छिपाता है (हमने इसे खोला नहीं)।"));
+  if (p.username || /@/.test(raw.split(/[/?#]/, 3).slice(0, 3).join("/").replace(/^[a-z]+:\/\//i, "").split("/")[0])) reasons.push(R("L05", 40, "Link contains '@', a trick that disguises the real site.", "लिंक में '@' है, जो असली साइट छिपाने की चाल है।"));
+  let brandHit = null;
+  if (!official && !IP_RE.test(host)) {
+    const tokens = labels.flatMap(part => part.replace(/_/g, "-").split("-")).filter(Boolean);
+    outer: for (const tok of tokens) {
+      const base = [...tok].map(c => LEET[c] || c).join("");
+      for (const norm of new Set([base, base.replace(/rn/g, "m"), base.replace(/vv/g, "w")])) {
+        for (const b of Object.keys(BRANDS)) {
+          if (norm === b || (b.length >= 5 && norm.includes(b)) || (b.length >= 5 && norm.length >= 5 && norm !== b && editDist(norm, b) <= 1)) { brandHit = b; break outer; }
+        }
+      }
+    }
+  }
+  if (brandHit) reasons.push(R("L06", 50, `Name imitates '${brandHit}' but the site is not its official domain.`, `नाम '${brandHit}' जैसा दिखता है पर यह उसका आधिकारिक डोमेन नहीं है।`));
+  if (!official) {
+    const hp = host + (p.pathname || "").toLowerCase();
+    const hit = KEYWORDS.filter(k => hp.includes(k));
+    if (hit.length) reasons.push(R("L07", 15, `Pressure words in the link: ${hit.slice(0, 3).join(", ")}.`, `लिंक में दबाव वाले शब्द: ${hit.slice(0, 3).join(", ")}।`));
+  }
+  const tld = labels[labels.length - 1];
+  if (BAD_TLDS.has(tld) && !official) reasons.push(R("L08", 20, `Uncommon ending '.${tld}' is often used in throw-away scam sites.`, `'.${tld}' अंत अक्सर अस्थायी धोखाधड़ी साइटों में होता है।`));
+  if (labels.length - reg.split(".").length >= 3 || host.length > 45 || (host.match(/-/g) || []).length >= 3) reasons.push(R("L09", 10, "Unusually long or complicated domain name.", "डोमेन नाम असामान्य रूप से लंबा या जटिल है।"));
+  if (p.port && !["80", "443"].includes(p.port)) reasons.push(R("L10", 10, "Link uses an unusual network port.", "लिंक असामान्य पोर्ट इस्तेमाल करता है।"));
+  const score = Math.min(100, reasons.reduce((a, r) => a + r.weight, 0));
+  const level = score >= 50 ? "High" : score >= 20 ? "Medium" : "Low";
+  if (official && !reasons.length) reasons.push(R("L00", 0, "Domain is on the built-in official list (not a guarantee).", "डोमेन अंतर्निहित आधिकारिक सूची में है (गारंटी नहीं)।"));
+  return {level, score, reasons, host, url: raw.slice(0, 120)};
+}
+
+/* ======================= MESSAGE RISK ======================= */
+const NEG = /(do not|don't|dont|never|mat|न)\s+(\w+\s+){0,2}(share|tell|give|disclose|send|बताएं|बताना|शेयर)/i;
+const PIN_ASK = /\b(enter|share|send|give|tell|type|put|dalo|daalo|batao|bata do|bhejo)\b.{0,40}\b(upi\s*)?pin\b/i;
+const PIN_ASK_HI = /पिन.{0,20}(डालें|डालो|बताएं|बताओ|भेजें|दर्ज)|(डालें|बताएं|भेजें).{0,20}पिन/;
+const RECEIVE = /\b(receive|refund|credit|cashback|get (the )?money|paisa|prize|reward|claim)\b|रिफंड|पैसे? (मिल|आ)/i;
+const OTP_ASK = /\b(enter|share|send|give|tell|read out|batao|bhejo)\b.{0,30}\b(otp|cvv|card number|card details|atm pin|net ?banking password)\b/i;
+const OTP_ASK_HI = /ओटीपी.{0,15}(बताएं|बताओ|भेजें|शेयर)|(बताएं|भेजें|शेयर).{0,15}ओटीपी/;
+const MRULES = [
+  ["U04", 25, /\b(collect request|payment request|request money|approve (the |this )?(request|payment)|accept (the |this )?request)\b/i, "Approving a collect request SENDS money from your account; it never receives money.", "'कलेक्ट रिक्वेस्ट' मंज़ूर करने से आपके खाते से पैसे जाते हैं, आते नहीं।"],
+  ["U05", 15, /\b(urgent(ly)?|immediately|right now|asap|within \d+ ?(min|minutes|hours?)|last chance|expires? (today|soon)|abhi|turant|jaldi)\b|तुरंत|जल्दी/i, "Creates urgency to stop you thinking.", "जल्दबाज़ी का दबाव बनाकर सोचने का समय नहीं देता।"],
+  ["U06", 25, /\b(lottery|lucky draw|prize|you have won|you won|kbc|cashback offer|reward points|free gift|refund (is )?(pending|waiting|initiated))\b/i, "Prize / refund bait is a classic scam opening.", "इनाम / रिफंड का लालच ठगी की आम शुरुआत है।"],
+  ["U07", 50, /\b(anydesk|teamviewer|quicksupport|rustdesk|screen ?share|remote access)\b/i, "Asks for a remote-access app, which lets a stranger control your phone.", "रिमोट-एक्सेस ऐप माँगता है, जिससे अजनबी आपका फ़ोन चला सकता है।"],
+  ["U08", 40, /\.apk\b|install (this|the) (app|apk)|download (this|the) (app|apk)/i, "Asks you to install an app from outside the official store.", "आधिकारिक स्टोर के बाहर से ऐप इंस्टॉल करने को कहता है।"],
+  ["U09", 30, /\b(kyc (is |will be )?(expired|expire|pending|update|suspended|blocked)|account (will be |has been |is )?(blocked|suspended|closed|frozen)|sim (will be )?blocked|bank (manager|officer|executive)|customer care executive|income tax (notice|department))\b/i, "Impersonates a bank/authority and threatens a block.", "बैंक/अधिकारी बनकर खाता बंद होने की धमकी देता है।"],
+  ["U10", 30, /\b(this is my new number|new number)\b|\b(papa|mummy|beta|bhai|dad|mom)\b.{0,60}\b(accident|hospital|arrest|police|trouble|emergency)\b/i, "Family-emergency story from an unknown number; verify by calling the saved number.", "अनजान नंबर से परिवार की इमरजेंसी की कहानी; सेव किए नंबर पर कॉल करके जाँचें।"],
+  ["U13", 20, /\b(send|transfer|pay|bhej(o|na)?)\b.{0,25}(\d{4,}|(₹|rs\.?|rupees|inr)\s?\d+)/i, "Asks you to send a specific amount of money.", "एक तय रकम भेजने को कहता है।"],
+  ["U11", 25, /\b(processing fee|registration fee|advance (payment|fee)|security deposit|delivery charges?|customs fee)\b/i, "Asks for an upfront fee before giving money or goods.", "पैसे या सामान देने से पहले अग्रिम शुल्क माँगता है।"],
+];
+const mr = (id, w, en, hi, sev) => ({id, weight: w, en, hi, severity: sev || (w >= 45 ? "high" : w >= 20 ? "medium" : "low")});
+function analyzeMsg(text) {
+  let t = (text || "").trim();
+  if (t.length < 4 || !/[A-Za-zऀ-ॿ]/.test(t)) return {level: "Unknown", score: 0, reasons: [], urls: [],
+    next_en: "Could not analyse this input. Do not treat it as safe; verify manually.", next_hi: "इस इनपुट का विश्लेषण नहीं हो सका। इसे सुरक्षित न मानें; खुद जाँचें।",
+    note_en: "Risk indicator only; not a guarantee.", note_hi: "यह केवल जोखिम संकेत है; गारंटी नहीं।"};
+  t = t.slice(0, 5000);
+  const negated = NEG.test(t), reasons = [];
+  if ((PIN_ASK.test(t) || PIN_ASK_HI.test(t)) && !negated) {
+    if (RECEIVE.test(t)) reasons.push(mr("U01", 70, "Asks for your UPI PIN in order to 'receive' money. The PIN is only ever needed to SEND money.", "पैसे 'पाने' के लिए UPI पिन माँगता है। पिन सिर्फ़ पैसे भेजने के लिए लगता है।", "high"));
+    else reasons.push(mr("U02", 45, "Someone is asking you to enter or share a PIN.", "कोई आपसे पिन डालने या बताने को कह रहा है।", "high"));
+  }
+  if ((OTP_ASK.test(t) || OTP_ASK_HI.test(t)) && !negated) reasons.push(mr("U03", 45, "Asks for OTP / card details, which no genuine bank asks for.", "OTP / कार्ड विवरण माँगता है, जो असली बैंक कभी नहीं माँगता।", "high"));
+  for (const [id, w, rx, en, hi] of MRULES) if (rx.test(t)) reasons.push(mr(id, w, en, hi));
+  const urls = [];
+  for (const u of extractUrls(t)) {
+    const r = analyzeUrl(u);
+    urls.push({url: r.url, level: r.level, score: r.score});
+    if (r.level === "High" || r.level === "Medium") {
+      reasons.push(mr("U12", r.level === "High" ? 45 : 20, `Suspicious link (${r.host}): ` + r.reasons.slice(0, 2).map(x => x.en).join(" "), `संदिग्ध लिंक (${r.host}): ` + r.reasons.slice(0, 2).map(x => x.hi).join(" "), r.level === "High" ? "high" : "medium"));
+    }
+  }
+  const score = Math.min(100, reasons.reduce((a, r) => a + r.weight, 0));
+  const level = (reasons.some(r => r.id === "U01") || score >= 60) ? "High" : score >= 25 ? "Medium" : "Low";
+  const NX = {High: ["Do not pay, click or share anything. End the conversation and verify through the official app or a number you already have saved.", "पैसे न भेजें, लिंक न खोलें, कुछ साझा न करें। बातचीत बंद करें और आधिकारिक ऐप या अपने सेव किए नंबर से जाँचें।"],
+    Medium: ["Pause. Verify independently through the official app before acting.", "रुकें। कुछ भी करने से पहले आधिकारिक ऐप से खुद जाँचें।"],
+    Low: ["No configured warning signs found. This is not a guarantee; still verify important payments in your official app.", "कोई तय चेतावनी संकेत नहीं मिला। यह गारंटी नहीं है; ज़रूरी भुगतान आधिकारिक ऐप में जाँचें।"]}[level];
+  return {level, score, reasons, urls, next_en: NX[0], next_hi: NX[1], note_en: "Risk indicator only. It cannot confirm anything with a bank.", note_hi: "यह केवल जोखिम संकेत है। यह बैंक से कुछ भी पुष्टि नहीं कर सकता।"};
+}
+
+/* ======================= QR INTEGRITY ======================= */
+const UPI_ID_RE = /^[A-Za-z0-9.\-_]{2,256}@[A-Za-z][A-Za-z0-9]{1,63}$/;
+function parseQr(payload) {
+  const p = (payload || "").trim();
+  if (!p) return {kind: "empty"};
+  if (/^upi:\/\//i.test(p)) {
+    const qs = new URLSearchParams(p.split("?").slice(1).join("?")), q = {};
+    for (const [k, v] of qs) (q[k.toLowerCase()] ||= []).push(v);
+    const pa = q.pa || [""];
+    return {kind: "upi", pa: pa[0].trim(), pn: (q.pn || [""])[0].trim(), am: (q.am || [""])[0].trim(), dup: pa.length > 1, paValues: pa};
+  }
+  if (/^(https?:\/\/|www\.)/i.test(p)) {
+    let host = ""; try { host = new URL(p.includes("://") ? p : "http://" + p).hostname; } catch (e) {}
+    return {kind: "url", host, shortened: SHORTENERS.has(registrable(host))};
+  }
+  return {kind: "other", preview: p.slice(0, 40)};
+}
+const normName = s => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+function compareQr(payload, registered) {
+  const parsed = parseQr(payload);
+  const res = {flags: [], expected: registered.map(r => r.upi)};
+  if (parsed.kind === "empty") return {...res, status: "UNABLE_TO_PARSE", en: "No QR could be read. Verify the payee inside your payment app.", hi: "QR पढ़ा नहीं जा सका। अपने पेमेंट ऐप में पाने वाले का नाम जाँचें।"};
+  if (parsed.kind === "url" || parsed.kind === "other") return {...res, status: "NOT_UPI", observed: parsed.host || parsed.preview,
+    en: "This QR does not contain a UPI payment address, so it is not your payment QR." + (parsed.shortened ? " It is a shortened link." : ""), hi: "इस QR में UPI भुगतान पता नहीं है, इसलिए यह आपका भुगतान QR नहीं है।"};
+  const pa = parsed.pa;
+  res.observed = pa; res.observedName = parsed.pn;
+  if (!pa || !UPI_ID_RE.test(pa)) return {...res, status: "UNABLE_TO_PARSE", en: "QR looks like UPI but the payment address is missing or malformed.", hi: "QR UPI जैसा है पर भुगतान पता गायब या गलत है।"};
+  if (parsed.dup && new Set(parsed.paValues.map(v => v.toLowerCase())).size > 1) { res.flags.push("duplicate_pa");
+    return {...res, status: "MISMATCH", en: "QR contains more than one payee address, which is abnormal. Do not accept payments to it.", hi: "QR में एक से ज़्यादा भुगतान पते हैं, जो असामान्य है। इसमें भुगतान न लें।"}; }
+  if (parsed.am) res.flags.push("fixed_amount");
+  const hit = registered.find(r => r.upi.toLowerCase() === pa.toLowerCase());
+  if (hit) {
+    const en_ = normName(hit.name), sn = normName(parsed.pn);
+    if (en_ && sn && en_ !== sn) return {...res, status: "PARTIAL", en: `Payment address matches, but the payee name differs (expected '${hit.name}', QR says '${parsed.pn}'). Check before accepting.`, hi: `पता मेल खाता है, पर नाम अलग है (अपेक्षित '${hit.name}', QR में '${parsed.pn}')। स्वीकार करने से पहले जाँचें।`};
+    return {...res, status: "MATCH", en: "Payment address matches a registered QR. This confirms the QR content, not that any payment arrived.", hi: "भुगतान पता पंजीकृत QR से मेल खाता है। यह QR की सामग्री की पुष्टि है, भुगतान आने की नहीं।"};
+  }
+  const close = registered.filter(r => editDist(pa.toLowerCase(), r.upi.toLowerCase()) <= 2);
+  if (close.length) res.flags.push("look_alike_of_registered");
+  return {...res, status: "MISMATCH", en: "This QR pays a DIFFERENT address than your registered one." + (close.length ? " It looks very similar to yours, a common swap trick." : ""),
+    hi: "यह QR आपके पंजीकृत पते से अलग पते पर पैसे भेजता है।" + (close.length ? " यह आपके पते जैसा दिखता है, जो बदलने की आम चाल है।" : "")};
+}
+const QR_SAMPLES = {genuine: "upi://pay?pa=sharmageneral@okaxis&pn=Sharma%20General%20Store&cu=INR", swapped: "upi://pay?pa=sharmagenera1@okaxis&pn=Sharma%20General%20Store&cu=INR",
+  other: "upi://pay?pa=quickcash772@ybl&pn=Quick%20Cash&cu=INR", short: "https://bit.ly/3xPayNow", name: "upi://pay?pa=sharmageneral@okaxis&pn=Raju%20Traders&cu=INR"};
+
+/* ======================= RECONCILIATION ======================= */
+const STATUS_MAP = {SUCCESS: "success", SUCCESSFUL: "success", COMPLETED: "success", CREDIT: "success", PENDING: "pending", PROCESSING: "pending", INITIATED: "pending", FAILED: "failed", FAILURE: "failed", DECLINED: "failed", REFUND: "refund", REVERSAL: "refund", REVERSED: "refund"};
+function parseTs(s) {
+  s = (s || "").trim(); let m;
+  if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/))) return new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+  if ((m = s.match(/^(\d{2})[-/](\d{2})[-/](\d{4}) (\d{2}):(\d{2})(?::(\d{2}))?$/))) return new Date(+m[3], m[2] - 1, +m[1], +m[4], +m[5], +(m[6] || 0));
+  return null;
+}
+function parseAmount(s) { const n = parseFloat(String(s || "").replace(/₹|Rs\.?|,/g, "").trim()); return Number.isFinite(n) ? Math.round(n * 100) / 100 : null; }
+function csvRows(text) {
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true; else if (c === ",") { row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+function parseStatement(text) {
+  const rows = csvRows(String(text).replace(/^﻿/, "")); if (!rows.length) return {rows: [], errors: [{row: 0, error: "Empty file."}]};
+  const head = rows[0].map(h => h.trim().toLowerCase()), need = ["txn_id", "timestamp", "amount", "status"], miss = need.filter(h => !head.includes(h));
+  if (miss.length) return {rows: [], errors: [{row: 0, error: `Missing required column(s): ${miss.join(", ")}. Expected: txn_id,timestamp,amount,status[,reference]`}]};
+  const idx = Object.fromEntries(head.map((h, i) => [h, i])), out = [], errors = [], seen = new Set();
+  rows.slice(1, 5001).forEach((r, k) => {
+    const g = n => (r[idx[n]] || "").trim(), ts = parseTs(g("timestamp")); let amt = parseAmount(g("amount")); const st = g("status").toUpperCase();
+    if (!g("txn_id") || !ts || amt === null || !STATUS_MAP[st]) { errors.push({row: k + 2, error: "Malformed row (txn_id, timestamp, amount or status invalid)."}); return; }
+    let status = STATUS_MAP[st]; if (amt < 0) { status = "refund"; amt = Math.abs(amt); }
+    const dup = seen.has(g("txn_id")); seen.add(g("txn_id"));
+    out.push({txn_id: g("txn_id"), ts, amount: amt, status, reference: g("reference"), duplicate: dup});
+  });
+  return {rows: out, errors};
+}
+const RSTAT = {MATCHED: ["Found in imported statement.", "आयात की गई स्टेटमेंट में मिला।"],
+  UNMATCHED: ["No matching entry in the imported statement. Check your official payment app and scan your QR now.", "आयात की गई स्टेटमेंट में कोई मेल नहीं। अपना आधिकारिक पेमेंट ऐप जाँचें और अभी अपना QR स्कैन करें।"],
+  AMBIGUOUS: ["More than one statement entry fits this sale. Resolve it by hand using the reference.", "इस बिक्री से एक से ज़्यादा एंट्री मेल खाती हैं। रेफ़रेंस से खुद तय करें।"],
+  PENDING: ["Statement shows this payment as pending, not completed.", "स्टेटमेंट में यह भुगतान लंबित दिख रहा है, पूरा नहीं।"],
+  FAILED: ["Statement shows a failed payment for this amount.", "स्टेटमेंट में इस राशि का भुगतान असफल दिख रहा है।"]};
+function reconcile(sales, txns, windowMin = 30) {
+  const usable = txns.filter(t => !t.duplicate), consumed = new Set(), out = [];
+  for (const s of [...sales].sort((a, b) => a.ts - b.ts)) {
+    const res = {saleId: s.id, amount: s.amount, ts: s.ts, status: null, txn: null, candidates: []};
+    if (s.ref) for (const t of usable) if (!consumed.has(t.txn_id) && t.status === "success" && t.reference.toLowerCase() === s.ref.toLowerCase() && Math.abs(t.amount - s.amount) < 0.005) { Object.assign(res, {status: "MATCHED", txn: t.txn_id}); consumed.add(t.txn_id); break; }
+    if (!res.status) {
+      const near = usable.filter(t => Math.abs(t.amount - s.amount) < 0.005 && Math.abs(t.ts - s.ts) <= windowMin * MIN);
+      const ok = near.filter(t => t.status === "success" && !consumed.has(t.txn_id));
+      if (ok.length === 1) { Object.assign(res, {status: "MATCHED", txn: ok[0].txn_id}); consumed.add(ok[0].txn_id); }
+      else if (ok.length > 1) Object.assign(res, {status: "AMBIGUOUS", candidates: ok.map(t => t.txn_id)});
+      else if (near.some(t => t.status === "pending")) res.status = "PENDING";
+      else if (near.some(t => t.status === "failed")) res.status = "FAILED";
+      else res.status = "UNMATCHED";
+    }
+    [res.en, res.hi] = RSTAT[res.status]; out.push(res);
+  }
+  const summary = {}; for (const k of Object.keys(RSTAT)) summary[k] = out.filter(r => r.status === k).length;
+  summary.duplicates = txns.filter(t => t.duplicate).map(t => t.txn_id); summary.refunds = txns.filter(t => t.status === "refund").map(t => t.txn_id);
+  return {rows: out, summary};
+}
+function verifyStatus(app, amt, txn, shot) {
+  if (app && amt) return {status: "VERIFIED", lvl: "low", en: "Verified: you confirmed the credit inside your official payment app / bank channel.", hi: "सत्यापित: आपने आधिकारिक पेमेंट ऐप / बैंक चैनल में क्रेडिट खुद देखा है।"};
+  if (shot || !(app || txn)) return {status: "NOT VERIFIED", lvl: "high", en: "Not verified. A screenshot is not proof of payment. Open your official app or bank SMS and look for the credit.", hi: "सत्यापित नहीं। स्क्रीनशॉट भुगतान का सबूत नहीं है। अपना आधिकारिक ऐप या बैंक SMS खोलकर क्रेडिट देखें।"};
+  return {status: "NEEDS CHECKING", lvl: "medium", en: "Needs checking. Some details were seen, but the credit and amount are not both confirmed in your official app.", hi: "जाँच ज़रूरी। कुछ जानकारी दिखी, पर क्रेडिट और राशि दोनों आधिकारिक ऐप में पुष्ट नहीं हैं।"};
+}
+const DEMO_SALES = [[198, 250], [195, 1200], [88, 80], [58, 450], [30, 999]];
+function demoStatement(now) {
+  const t = m => fmt(new Date(now - m * MIN));
+  return `txn_id,timestamp,amount,status,reference\nT1001,${t(199)},250.00,SUCCESS,\nT1002,${t(194)},1200.00,SUCCESS,\nT1003,${t(87)},80.00,SUCCESS,\nT1003,${t(87)},80.00,SUCCESS,\nT1004,${t(57)},450.00,PENDING,\nT1005,${t(40)},-100.00,REFUND,\nbad_row_without_fields\n`;
+}
+
+/* ======================= SECRET SCAN ======================= */
+const PLACEHOLDER = /(changeme|example|your[_-]|xxxx|<.*>|\$\{|os\.environ|getenv|process\.env|\*{3,}|dummy|placeholder|sample)/i;
+const SRULES = [
+  ["S001", "AWS access key id", "AWS एक्सेस कुंजी", "high", /\b(AKIA[0-9A-Z]{16})\b/],
+  ["S002", "Private key block", "प्राइवेट की ब्लॉक", "high", /(-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----)/],
+  ["S003", "Google API key", "Google API कुंजी", "high", /\b(AIza[0-9A-Za-z_\-]{35})\b/],
+  ["S004", "GitHub token", "GitHub टोकन", "high", /\b(gh[pousr]_[A-Za-z0-9]{36,})\b/],
+  ["S005", "Slack token", "Slack टोकन", "high", /\b(xox[baprs]-[A-Za-z0-9\-]{10,})\b/],
+  ["S006", "Hard-coded credential", "कोड में लिखा पासवर्ड/कुंजी", "medium", /[A-Za-z0-9_\-]*(?:api[_-]?key|secret|token|passwd|password|pwd|auth)[A-Za-z0-9_\-]*["']?\s*[:=]\s*["']([^"'\s]{8,})["']/i],
+  ["S007", "Credential in connection string", "कनेक्शन स्ट्रिंग में पासवर्ड", "high", /\b[a-z][a-z0-9+.\-]*:\/\/[^/\s:@]+:([^/\s:@]{4,})@/i],
+];
+const S006_UNQUOTED = /^\s*[A-Za-z0-9_\-]*(?:api[_-]?key|secret|token|passwd|password|pwd|auth)[A-Za-z0-9_\-]*\s*[:=]\s*([^\s"'#]{8,})\s*$/i;
+const CRULES = [
+  ["C001", "eval/exec on dynamic input", "eval/exec का उपयोग", "medium", /\b(?:eval|exec)\s*\(/, "Avoid eval/exec; parse data with json/ast.literal_eval.", "eval/exec से बचें; डेटा के लिए json या ast.literal_eval इस्तेमाल करें।"],
+  ["C002", "Shell command with shell=True", "shell=True वाला कमांड", "medium", /shell\s*=\s*True/, "Pass a list of arguments and drop shell=True.", "आर्ग्युमेंट की सूची दें और shell=True हटाएँ।"],
+  ["C003", "TLS verification disabled", "TLS सत्यापन बंद", "medium", /verify\s*=\s*False/, "Keep certificate verification on.", "प्रमाणपत्र सत्यापन चालू रखें।"],
+  ["C004", "Debug mode enabled", "डिबग मोड चालू", "low", /debug\s*=\s*True/, "Turn debug off outside local development.", "स्थानीय विकास के बाहर डिबग बंद रखें।"],
+  ["C005", "Weak hash (MD5/SHA1)", "कमज़ोर हैश (MD5/SHA1)", "low", /hashlib\.(?:md5|sha1)\(/, "Use SHA-256 or a password hasher (bcrypt/argon2).", "SHA-256 या पासवर्ड हैशर (bcrypt/argon2) इस्तेमाल करें।"],
+  ["C006", "SQL built from strings", "स्ट्रिंग से बनी SQL क्वेरी", "medium", /execute\(\s*(?:f["']|["'][^"']*["']\s*(?:%|\+|\.format))/i, "Use parameterised queries.", "पैरामीटर वाली क्वेरी इस्तेमाल करें।"],
+  ["C007", "Unsafe deserialisation", "असुरक्षित डीसीरियलाइज़ेशन", "medium", /\bpickle\.loads?\(|yaml\.load\((?![^)]*Loader)/, "Use json or yaml.safe_load.", "json या yaml.safe_load इस्तेमाल करें।"],
+];
+const ADV_SECRET = "Rotate this key now (assume it is exposed), move it to an environment variable or secrets manager, and keep the file out of version control.";
+const ADV_SECRET_HI = "कुंजी तुरंत बदलें (मानें कि वह लीक हो चुकी है), उसे पर्यावरण चर या सीक्रेट मैनेजर में रखें, और फ़ाइल को वर्ज़न कंट्रोल से बाहर रखें।";
+function entropy(s) { if (!s) return 0; const f = {}; for (const c of s) f[c] = (f[c] || 0) + 1; return -Object.values(f).reduce((a, n) => a + (n / s.length) * Math.log2(n / s.length), 0); }
+function mask(v) { v = v.trim(); return v.length <= 6 ? "*".repeat(v.length) : v.slice(0, 3) + "*".repeat(Math.min(12, v.length - 3)) + ` (len ${v.length})`; }
+const CONFIG_EXT = [".env", ".ini", ".cfg", ".conf", ".properties", ".yml", ".yaml", ".toml"];
+function scanText(text, name) {
+  const found = [], lower = name.toLowerCase();
+  text.split(/\r?\n/).forEach((line, i) => {
+    const ln = i + 1; if (line.length > 2000) return;
+    for (const [id, label, labelHi, sev, rx] of SRULES) {
+      const m = line.match(rx); if (!m) continue; const val = m[1];
+      if (PLACEHOLDER.test(line) || PLACEHOLDER.test(val)) continue;
+      if ((id === "S006" || id === "S007") && entropy(val) < 2.8) continue;
+      found.push({rule: id, type: label, typeHi: labelHi, severity: sev, line: ln, masked: mask(val), kind: "secret", advice: ADV_SECRET, adviceHi: ADV_SECRET_HI, fixable: lower.endsWith(".py") && id === "S006"});
+    }
+    if (CONFIG_EXT.some(e => lower.endsWith(e))) {
+      const m = line.match(S006_UNQUOTED);
+      if (m && !PLACEHOLDER.test(line) && entropy(m[1]) >= 2.8 && !found.some(f => f.line === ln && f.kind === "secret"))
+        found.push({rule: "S006", type: "Hard-coded credential", typeHi: "कोड में लिखा पासवर्ड/कुंजी", severity: "medium", line: ln, masked: mask(m[1]), kind: "secret", advice: ADV_SECRET, adviceHi: ADV_SECRET_HI, fixable: false});
+    }
+    for (const [id, label, labelHi, sev, rx, adv, advHi] of CRULES)
+      if (rx.test(line) && !/^\s*(#|\/\/)/.test(line)) found.push({rule: id, type: label, typeHi: labelHi, severity: sev, line: ln, masked: line.trim().slice(0, 60), kind: "code", advice: adv, adviceHi: advHi, fixable: false});
+  });
+  return found;
+}
+const ASSIGN_RE = /^(\s*)([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(["'])(.+?)\3\s*(#.*)?$/;
+function proposeFix(text, line) {
+  const lines = text.split(/\r?\n/), l = lines[line - 1], m = l && l.match(ASSIGN_RE);
+  if (!m) return null;
+  const env = m[2].toUpperCase(), shownOld = l.replace(m[4], mask(m[4])), neu = `${m[1]}${m[2]} = os.environ.get("${env}", "")`;
+  const needImport = !lines.some(x => /^\s*import os\b/.test(x));
+  return {diff: `--- a/file.py\n+++ b/file.py\n${needImport ? "+import os\n" : ""}-${shownOld}\n+${neu}`, env};
+}
+const SAMPLE_PY = `import sqlite3
+
+DB_PASSWORD = "Rj9#kL2mQ8vXz4Tn"
+API_KEY = os.environ.get("API_KEY")
+PAYMENT_TOKEN = "d93Kx0LpQm72VnB8sWe5"
+
+def find_customer(conn, name):
+    return conn.execute("SELECT * FROM customers WHERE name = '%s'" % name)
+
+def fetch(url):
+    import requests
+    return requests.get(url, verify=False)
+`;
+const SAMPLE_ENV = `AWS_KEY=AKIAQ7XK2MZP4WNB5TDE
+DB_URL=postgres://shopadmin:pX7mK2vL9qZ@10.0.0.5:5432/billing
+SECRET_KEY=changeme
+`;
+
+/* ======================= LOGIN MONITOR ======================= */
+const MON = {Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11};
+const LINE_RE = /^(?<ts>[A-Z][a-z]{2}\s+\d{1,2}\s\d{2}:\d{2}:\d{2}|\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[+-]\d{2}:?\d{2}|Z)?)\s+\S+\s+(?<proc>[\w\-./]+)(?:\[\d+\])?:\s+(?<msg>.*)$/;
+const FAIL_RES = [/Failed password for (?:invalid user )?(?<user>\S+) from (?<ip>[0-9a-fA-F.:]+)/, /Invalid user (?<user>\S+) from (?<ip>[0-9a-fA-F.:]+)/];
+const OK_RE = /Accepted (?:password|publickey) for (?<user>\S+) from (?<ip>[0-9a-fA-F.:]+)/;
+function logTs(s, year) {
+  s = s.trim(); let m;
+  if (/^\d{4}-/.test(s)) { const d = new Date(s); return isNaN(d) ? null : d; }
+  if ((m = s.match(/^([A-Z][a-z]{2})\s+(\d{1,2})\s(\d{2}):(\d{2}):(\d{2})/)) && m[1] in MON) return new Date(year, MON[m[1]], +m[2], +m[3], +m[4], +m[5]);
+  return null;
+}
+function parseLog(lines, year = new Date().getFullYear()) {
+  const ev = [];
+  for (const line of lines) {
+    const m = line.trim().match(LINE_RE); if (!m || !/^sshd?/i.test(m.groups.proc) && !/^ssh/i.test(m.groups.proc)) continue;
+    const ts = logTs(m.groups.ts, year); if (!ts) continue;
+    const ok = m.groups.msg.match(OK_RE);
+    if (ok) { ev.push({ts, user: ok.groups.user, ip: ok.groups.ip, kind: "success"}); continue; }
+    for (const rx of FAIL_RES) { const f = m.groups.msg.match(rx); if (f) { ev.push({ts, user: f.groups.user, ip: f.groups.ip, kind: "fail"}); break; } }
+  }
+  return ev.sort((a, b) => a.ts - b.ts);
+}
+const maskIp = ip => ip.includes(".") ? ip.split(".").slice(0, 3).concat("x").join(".") : ip.slice(0, 9) + "…";
+function detectLogins(events, windowS = 300, threshold = 5, spray = 3) {
+  const findings = [], byIp = {};
+  for (const e of events) (byIp[e.ip] ||= []).push(e);
+  const mk = (id, sev, ip, g, users, en, hi) => ({rule: id, severity: sev, source: maskIp(ip), accounts: [...users].sort().slice(0, 5), count: g.length, first: fmt(g[0].ts), last: fmt(g[g.length - 1].ts), en, hi,
+    action_en: "Review the account, enable key-based SSH login and a firewall rate-limit. No automatic blocking was done.", action_hi: "खाते की समीक्षा करें, SSH में की-आधारित लॉगिन और फ़ायरवॉल सीमा चालू करें। कोई स्वचालित ब्लॉक नहीं किया गया।"});
+  for (const [ip, evs] of Object.entries(byIp)) {
+    const fails = evs.filter(e => e.kind === "fail");
+    for (let i = 0; i < fails.length; i++) {
+      const g = fails.slice(i).filter(f => f.ts - fails[i].ts <= windowS * 1000);
+      if (g.length < Math.min(threshold, spray)) continue;
+      const users = new Set(g.map(x => x.user)), last = g[g.length - 1].ts;
+      const success = evs.some(e => e.kind === "success" && e.ts >= last && e.ts - last <= windowS * 1000);
+      if (success && g.length >= threshold) { findings.push(mk("L03", "high", ip, g, users, "A successful login followed repeated failures from the same source. Confirm it was you; consider changing the password.", "बार-बार विफलता के बाद उसी स्रोत से सफल लॉगिन हुआ। पुष्टि करें कि यह आप थे; पासवर्ड बदलने पर विचार करें।")); break; }
+      if (g.length >= threshold && users.size < spray) { findings.push(mk("L01", "medium", ip, g, users, `${g.length} failed logins in ${windowS / 60} minutes from one source (possible password guessing; could also be a user who forgot a password).`, `${windowS / 60} मिनट में एक स्रोत से ${g.length} विफल लॉगिन (पासवर्ड अनुमान हो सकता है; भूला हुआ पासवर्ड भी हो सकता है)।`)); break; }
+      if (users.size >= spray) { findings.push(mk("L02", "medium", ip, g, users, `One source tried ${users.size} different accounts within ${windowS / 60} minutes (possible account probing).`, `एक स्रोत ने ${windowS / 60} मिनट में ${users.size} अलग खाते आज़माए (खातों की जाँच-पड़ताल संभव)।`)); break; }
+    }
+  }
+  return findings;
+}
+function synthLines(kind, now = new Date(), n = 7) {
+  const L = (t, msg) => `${Object.keys(MON)[t.getMonth()]} ${String(t.getDate()).padStart(2)} ${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())} shopbox sshd[2201]: ${msg}`, at = s => new Date(now.getTime() + s * 1000), out = [];
+  if (kind === "brute") for (let i = 0; i < n; i++) out.push(L(at(i * 6), `Failed password for admin from 203.0.113.45 port ${40000 + i} ssh2`));
+  else if (kind === "spray") ["root", "admin", "billing", "test", "pos"].forEach((u, i) => out.push(L(at(i * 8), `Failed password for invalid user ${u} from 198.51.100.77 port ${41000 + i} ssh2`)));
+  else if (kind === "success_after") { for (let i = 0; i < n; i++) out.push(L(at(i * 5), `Failed password for shopkeeper from 203.0.113.99 port ${42000 + i} ssh2`)); out.push(L(at(n * 5 + 10), "Accepted password for shopkeeper from 203.0.113.99 port 42100 ssh2")); }
+  else { out.push(L(at(0), "Failed password for shopkeeper from 192.0.2.10 port 43000 ssh2")); out.push(L(at(20), "Accepted password for shopkeeper from 192.0.2.10 port 43001 ssh2")); }
+  return out;
+}
+
+/* ======================= FACTORY SIMULATOR ======================= */
+const RANGES = {temp: [20, 85], vib: [0, 7], cur: [2, 15]}, WARN = {temp: 75, vib: 5.5, cur: 13}, HEARTBEAT_S = 30;
+const rnd = (a, b) => a + Math.random() * (b - a), r1 = x => Math.round(x * 10) / 10, r2 = x => Math.round(x * 100) / 100;
+function nextReading(prev, mode) {
+  if (mode === "heartbeat_loss") return null;
+  const t = prev ? prev.temp : 60;
+  const temp = mode === "overheat" ? (t > 70 ? Math.min(t + rnd(10, 14), 110) : t + rnd(12, 16)) : 60 + rnd(-3, 3);
+  return {ts: new Date(), temp: r1(temp), vib: r2(mode === "vibration" ? rnd(8.5, 11) : 3 + rnd(-0.6, 0.6)), cur: r2(9 + rnd(-0.8, 0.8))};
+}
+function evalIot(rs, now = new Date()) {
+  if (!rs.length) return [];
+  const last = rs[rs.length - 1], a = [], act = {action_en: "Operator inspection recommended. Alerts only. This prototype sends no control commands and cannot stop or change any machine.", action_hi: "ऑपरेटर द्वारा निरीक्षण की सलाह। यह प्रोटोटाइप केवल अलर्ट देता है, मशीन पर कोई नियंत्रण आदेश नहीं भेजता।"};
+  const add = (rule, severity, en, hi, evidence) => a.push({rule, severity, en, hi, evidence, ...act});
+  if (now - last.ts > HEARTBEAT_S * 1000) add("I04", "high", `No data from the pump for over ${HEARTBEAT_S} seconds (heartbeat missing).`, `पंप से ${HEARTBEAT_S} सेकंड से ज़्यादा समय से डेटा नहीं (हार्टबीट गायब)।`, `last seen ${pad(last.ts.getHours())}:${pad(last.ts.getMinutes())}:${pad(last.ts.getSeconds())}`);
+  const lab = {temp: ["Temperature", "तापमान"], vib: ["Vibration", "कंपन"], cur: ["Current", "करंट"]};
+  for (const k of Object.keys(RANGES)) {
+    const v = last[k], [lo, hi] = RANGES[k];
+    if (v > hi || v < lo) add("I01", "high", `${lab[k][0]} ${v} is outside the configured range ${lo}-${hi}.`, `${lab[k][1]} ${v} तय सीमा ${lo}-${hi} से बाहर है।`, `${k}=${v}`);
+    else if (v >= WARN[k]) add("I01", "medium", `${lab[k][0]} ${v} is near the upper limit (${hi}).`, `${lab[k][1]} ${v} ऊपरी सीमा (${hi}) के पास है।`, `${k}=${v}`);
+  }
+  if (rs.length >= 2 && Math.abs(rs[rs.length - 1].temp - rs[rs.length - 2].temp) >= 15) add("I02", "medium", `Temperature changed by ${Math.abs(rs[rs.length - 1].temp - rs[rs.length - 2].temp).toFixed(1)} degrees in one step.`, "तापमान एक कदम में अचानक बदला।", "delta>=15");
+  if (rs.length >= 3 && rs.slice(-3).every(x => x.temp > RANGES.temp[1])) add("I03", "high", "Temperature stayed above the limit for 3 consecutive readings.", "तापमान लगातार 3 रीडिंग तक सीमा से ऊपर रहा।", "3 consecutive");
+  return a;
+}
+
+/* ======================= CITIZEN GUIDE ======================= */
+const STEPS = [
+  ["Stay calm and do not send money during the call. Urgency is the scammer's main tool.", "शांत रहें और कॉल के दौरान पैसे न भेजें। जल्दबाज़ी ठग का मुख्य हथियार है।"],
+  ["End the call. Then call the person back on the number already saved in your phone, never the number that called you.", "कॉल काट दें। फिर उस व्यक्ति को आपके फ़ोन में पहले से सेव नंबर पर कॉल करें, कॉल करने वाले नंबर पर नहीं।"],
+  ["If they cannot be reached, call another family member or trusted contact to confirm the story.", "अगर वे न मिलें तो किसी दूसरे परिवार सदस्य या भरोसेमंद व्यक्ति से पुष्टि करें।"],
+  ["Ask for the family safe phrase agreed offline. Treat it as one signal, not absolute proof.", "परिवार का ऑफ़लाइन तय किया गया सुरक्षित शब्द पूछें। इसे एक संकेत मानें, पक्का सबूत नहीं।"],
+  ["Never share a UPI PIN, OTP or card details, and never approve a collect request, whoever is calling.", "कोई भी कॉल करे, UPI पिन, OTP या कार्ड विवरण न बताएं और कलेक्ट रिक्वेस्ट मंज़ूर न करें।"],
+  ["Report it: call 1930 (National Cyber Crime helpline) or visit cybercrime.gov.in.", "रिपोर्ट करें: 1930 (राष्ट्रीय साइबर अपराध हेल्पलाइन) पर कॉल करें या cybercrime.gov.in पर जाएँ।"]];
+const QUESTIONS = [["unknown_number", "The call came from a number not saved in your phone.", "कॉल ऐसे नंबर से आया जो आपके फ़ोन में सेव नहीं है।"], ["urgent_money", "They want money immediately.", "वे तुरंत पैसे माँग रहे हैं।"],
+  ["secrecy", "They asked you not to tell anyone else.", "उन्होंने किसी और को न बताने को कहा।"], ["no_video", "They refuse a video call or to call back on the saved number.", "वे वीडियो कॉल या सेव नंबर पर कॉलबैक से मना करते हैं।"],
+  ["new_account", "They gave a new or unfamiliar account / UPI ID to pay.", "उन्होंने भुगतान के लिए नया या अनजान खाता / UPI ID दिया।"], ["emotion", "The story is an emergency (accident, arrest, hospital).", "कहानी इमरजेंसी की है (दुर्घटना, गिरफ़्तारी, अस्पताल)।"]];
+function voiceEval(ans) {
+  const flags = QUESTIONS.filter(q => ans[q[0]]).map(q => q[0]);
+  if (flags.length >= 2) return {level: "High", flags, en: "Several warning signs match a voice-clone / emergency scam. Do not pay. Follow the steps and call the saved number.", hi: "कई चेतावनी संकेत वॉइस-क्लोन / इमरजेंसी ठगी से मेल खाते हैं। पैसे न भेजें। ऊपर के कदम अपनाएँ और सेव नंबर पर कॉल करें।"};
+  if (flags.length === 1) return {level: "Medium", flags, en: "One warning sign found. Verify through the saved number before doing anything.", hi: "एक चेतावनी संकेत मिला। कुछ भी करने से पहले सेव नंबर से जाँचें।"};
+  return {level: "Low", flags, en: "No listed warning signs ticked. This is not proof the call is genuine; verifying by call-back is still the safest habit.", hi: "कोई चेतावनी संकेत नहीं चुना गया। यह कॉल के असली होने का सबूत नहीं है; कॉलबैक से जाँचना फिर भी सबसे सुरक्षित है।"};
+}
+
+/* ======================= STATE, ALERTS, READINESS ======================= */
+const S = {alerts: [], nid: 1, registered: [{label: "Main counter", upi: "sharmageneral@okaxis", name: "Sharma General Store"}], qrScans: [], sales: [], txns: null, recon: null, scan: null, login: null, tele: [], silent: false, voice: false};
+function addAlert(module, rule, severity, titleEn, titleHi, evidence, source, actEn, actHi) {
+  if (S.alerts.some(a => !a.ack && a.module === module && a.rule === rule && a.evidence === evidence)) return null;
+  const a = {id: S.nid++, ts: new Date(), module, rule, severity, titleEn, titleHi, evidence: String(evidence).slice(0, 300), source, actEn, actHi, ack: false};
+  S.alerts.unshift(a); return a;
+}
+const supersede = module => S.alerts.forEach(a => { if (a.module === module) a.ack = true; });
+const openCount = module => S.alerts.filter(a => !a.ack && a.module === module).length;
+const HI = {High: "ऊँचा", Medium: "मध्यम", Low: "कम", Unknown: "अज्ञात", high: "गंभीर", medium: "मध्यम", low: "कम", Verified: "सत्यापित", Clean: "साफ़", Monitoring: "निगरानी में", Reviewed: "समीक्षित", "Review needed": "समीक्षा ज़रूरी", "Action needed": "कार्रवाई ज़रूरी", Alert: "अलर्ट", "Not assessed": "आकलन नहीं", Incomplete: "अधूरा", "All configured checks healthy": "सभी तय जाँच ठीक",
+  MATCH: "मेल खाता है", MISMATCH: "मेल नहीं", PARTIAL: "आंशिक मेल", NOT_UPI: "UPI नहीं", UNABLE_TO_PARSE: "पढ़ा नहीं गया", MATCHED: "मिला", UNMATCHED: "बेमेल", AMBIGUOUS: "अस्पष्ट", PENDING: "लंबित", FAILED: "असफल", VERIFIED: "सत्यापित", "NOT VERIFIED": "सत्यापित नहीं", "NEEDS CHECKING": "जाँच ज़रूरी"};
+const lvlCls = l => ({High: "high", high: "high", Medium: "medium", medium: "medium", Low: "low", low: "low"}[l] || "unk");
+const pill = (txt, cls) => `<span class="pill p-${cls || lvlCls(txt)}">${esc(LANG === "hi" && HI[txt] ? HI[txt] : String(txt).replace(/_/g, " "))}</span>`;
+const box = (lvl, inner) => `<div class="result ${lvlCls(lvl) === "unk" ? "" : lvlCls(lvl)}">${inner}</div>`;
+const reasonsHtml = rs => rs.length ? `<ul>${rs.map(r => `<li>${esc(T(r.en, r.hi))}<span class="rid">${esc(r.id)}</span></li>`).join("")}</ul>` : "";
+
+function readiness() {
+  const now = Date.now(), C = [];
+  const add = (n, nh, state, d, dh) => C.push({n, nh, state, d, dh});
+  const q = S.qrScans[S.qrScans.length - 1];
+  if (!q) add("Registered QR check", "पंजीकृत QR जाँच", "Not assessed", "No QR compared yet", "अभी कोई QR नहीं जाँचा");
+  else if (q.status === "MATCH") add("Registered QR check", "पंजीकृत QR जाँच", "Verified", `Matched at ${hhmm(q.ts)}`, `${hhmm(q.ts)} पर मेल खाया`);
+  else add("Registered QR check", "पंजीकृत QR जाँच", "Action needed", `Latest check: ${q.status}`, `नवीनतम जाँच: ${q.status}`);
+  if (!S.scan) add("Code and data scan", "कोड और डेटा स्कैन", "Not assessed", "No file scanned yet", "अभी कोई फ़ाइल स्कैन नहीं हुई");
+  else if (openCount("secret_scan") > 0) add("Code and data scan", "कोड और डेटा स्कैन", "Review needed", `${openCount("secret_scan")} open finding(s)`, `${openCount("secret_scan")} खुले निष्कर्ष`);
+  else add("Code and data scan", "कोड और डेटा स्कैन", "Clean", "No configured patterns found (not a guarantee)", "कोई तय पैटर्न नहीं मिला (गारंटी नहीं)");
+  if (!S.login) add("Login monitoring", "लॉगिन निगरानी", "Not assessed", "No log checked yet", "अभी कोई लॉग नहीं जाँचा");
+  else if (openCount("login") > 0) add("Login monitoring", "लॉगिन निगरानी", "Review needed", `${openCount("login")} pattern(s) flagged (pasted log)`, `${openCount("login")} पैटर्न चिह्नित (चिपकाया लॉग)`);
+  else add("Login monitoring", "लॉगिन निगरानी", "Monitoring", "No threshold alert in the pasted log", "चिपकाए लॉग में कोई सीमा अलर्ट नहीं");
+  if (!S.recon) add("Payment reconciliation", "भुगतान मिलान", "Not assessed", "No statement compared yet", "अभी कोई स्टेटमेंट नहीं मिलाई");
+  else if (S.recon.bad > 0) add("Payment reconciliation", "भुगतान मिलान", "Review needed", `${S.recon.bad} sale(s) not matched`, `${S.recon.bad} बिक्री का मिलान नहीं हुआ`);
+  else add("Payment reconciliation", "भुगतान मिलान", "Reviewed", "All recorded sales found in the statement", "सभी दर्ज बिक्री स्टेटमेंट में मिलीं");
+  if (!S.tele.length) add("Factory monitor (simulated)", "फ़ैक्टरी निगरानी (सिम्युलेटेड)", "Not assessed", "Simulator not started", "सिम्युलेटर शुरू नहीं हुआ");
+  else if (openCount("factory") > 0) add("Factory monitor (simulated)", "फ़ैक्टरी निगरानी (सिम्युलेटेड)", "Alert", `${openCount("factory")} active rule(s)`, `${openCount("factory")} सक्रिय नियम`);
+  else add("Factory monitor (simulated)", "फ़ैक्टरी निगरानी (सिम्युलेटेड)", "Monitoring", "Within configured range", "तय सीमा के भीतर");
+  const H = new Set(["Verified", "Clean", "Monitoring", "Reviewed"]), A = new Set(["Action needed", "Review needed", "Alert"]);
+  const overall = C.some(c => A.has(c.state)) ? "Action needed" : C.some(c => c.state === "Not assessed") ? "Incomplete" : "All configured checks healthy";
+  return {C, healthy: C.filter(c => H.has(c.state)).length, overall};
+}
+
+/* ======================= UI ======================= */
+let toastT;
+const toast = msg => { let t = $(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2200); };
+function speak(sev) {
+  if (!S.voice || sev !== "high" || !("speechSynthesis" in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(LANG === "hi" ? "सावधान! गंभीर जोखिम मिला है। कृपया स्क्रीन पर चेतावनी देखें।" : "Warning. A high risk was found. Please read the warning on the screen.");
+    u.lang = LANG === "hi" ? "hi-IN" : "en-IN"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch (e) {}
+}
+const TABS = [["overview", "Overview", "सारांश"], ["messages", "Messages", "संदेश"], ["qr", "QR & Pay", "QR और भुगतान"], ["linux", "Code & Logs", "कोड और लॉग"], ["factory", "Factory", "फ़ैक्टरी"], ["citizen", "Safety", "सुरक्षा"], ["alerts", "Alerts", "अलर्ट"]];
+function renderTabs(active) {
+  const nav = $("#tabs"); nav.innerHTML = TABS.map(([id, en, hi]) => `<button role="tab" data-go="${id}" aria-selected="${id === active}">${esc(T(en, hi))}</button>`).join("");
+}
+function go(id, push = true) {
+  if (!TABS.some(t => t[0] === id)) id = "overview";
+  $$(".panel").forEach(p => { p.hidden = p.id !== "p-" + id; });
+  renderTabs(id);
+  const b = $(`[data-go="${id}"]`); if (b) b.scrollIntoView({inline: "center", block: "nil" in {} ? "nearest" : "nearest"});
+  if (push) { try { history.replaceState(null, "", "#" + id); } catch (e) {} }
+  window.scrollTo({top: 0}); refresh();
+}
+function applyLang() {
+  $$("[data-en]").forEach(el => { el.textContent = T(el.dataset.en, el.dataset.hi); });
+  $("#langBtn").textContent = LANG === "en" ? "हिंदी" : "English";
+  document.documentElement.lang = LANG;
+  $$("select option[data-en]").forEach(o => { o.textContent = T(o.dataset.en, o.dataset.hi); });
+  const cur = (location.hash || "#overview").slice(1); renderTabs(TABS.some(t => t[0] === cur) ? cur : "overview");
+  renderGuide(); refresh();
+}
+function alertItem(a, ack = true) {
+  return `<div class="item ${a.severity} ${a.ack ? "ack" : ""}"><div>${pill(a.severity)} <b>${esc(T(a.titleEn, a.titleHi))}</b></div>
+    <div class="meta">${esc(fmt(a.ts))} · ${esc(a.module)} · ${esc(a.rule)} · ${esc(a.source)}</div><div class="meta">Evidence: ${esc(a.evidence)}</div>
+    <div style="margin-top:4px">${esc(T(a.actEn, a.actHi))}</div>${ack && !a.ack ? `<div class="row" style="margin-top:6px"><button class="btn sm" data-ack="${a.id}">${T("Mark as seen", "देख लिया")}</button></div>` : ""}</div>`;
+}
+function refresh() {
+  const r = readiness();
+  $("#overall").innerHTML = `<p style="margin:2px 0 8px">${pill(r.overall, r.overall === "Action needed" ? "high" : r.overall === "Incomplete" ? "medium" : "low")} <span class="small muted">${r.healthy}/${r.C.length} ${T("checks healthy", "जाँच ठीक")}</span></p>`;
+  $("#components").innerHTML = r.C.map(c => `<div class="comp"><div><b>${esc(T(c.n, c.nh))}</b><div class="d">${esc(T(c.d, c.dh))}</div></div>${pill(c.state, c.state === "Verified" || c.state === "Clean" || c.state === "Monitoring" || c.state === "Reviewed" ? "low" : c.state === "Not assessed" ? "unk" : c.state === "Alert" || c.state === "Action needed" ? "high" : "medium")}</div>`).join("");
+  const open = S.alerts.filter(a => !a.ack);
+  $("#nHigh").textContent = open.filter(a => a.severity === "high").length; $("#nAll").textContent = open.length;
+  $("#latest").innerHTML = open.slice(0, 4).map(a => alertItem(a, false)).join("") || `<p class="muted">${T("No open alerts. Run the demo checks to see some.", "कोई खुला अलर्ट नहीं। देखने के लिए डेमो जाँच चलाएँ।")}</p>`;
+  const sev = $("#fSev").value, op = $("#fOpen").value;
+  $("#alertList").innerHTML = S.alerts.filter(a => (!sev || a.severity === sev) && (!op || !a.ack)).map(a => alertItem(a)).join("") || `<p class="muted">${T("No alerts match.", "कोई अलर्ट नहीं।")}</p>`;
+  renderSales(); renderIot();
+}
+function renderGuide() {
+  $("#consent").textContent = T("Scam Shield never records or listens to calls or reads your messages. You open this checklist yourself after a suspicious call.", "Scam Shield कभी कॉल रिकॉर्ड नहीं करता, न सुनता है और न आपके संदेश पढ़ता है। संदिग्ध कॉल के बाद आप खुद यह चेकलिस्ट खोलते हैं।");
+  $("#steps").innerHTML = STEPS.map(s => `<li style="margin:6px 0">${esc(T(s[0], s[1]))}</li>`).join("");
+  const on = $$("#questions input:checked").map(i => i.value);
+  $("#questions").innerHTML = QUESTIONS.map(q => `<label class="chk"><input type="checkbox" value="${q[0]}" ${on.includes(q[0]) ? "checked" : ""}><span>${esc(T(q[1], q[2]))}</span></label>`).join("");
+}
+function noteAlerts(list) { list.forEach(a => a && speak(a.severity)); }
+
+/* --- messages --- */
+$("#msgScam").onclick = () => { $("#msg").value = "Dear customer, your KYC is pending and account will be blocked. Refund of Rs 4999 is waiting: enter your UPI PIN to receive the money right now at http://sbi-kyc-update.xyz/verify"; };
+$("#msgOk").onclick = () => { $("#msg").value = "Reminder: your electricity bill of Rs 1450 is due on 20 Nov. Pay through the official app. Never share your OTP or PIN with anyone."; };
+$("#msgGo").onclick = () => {
+  const r = analyzeMsg($("#msg").value);
+  $("#msgOut").innerHTML = box(r.level, `<div>${pill(r.level)} <span class="small muted">${T("score", "अंक")} ${r.score}/100</span></div>${reasonsHtml(r.reasons)}<p><b>${T("What to do:", "क्या करें:")}</b> ${esc(T(r.next_en, r.next_hi))}</p><p class="small muted">${esc(T(r.note_en, r.note_hi))}</p>`);
+  if (r.level === "High" || r.level === "Medium") { const ids = r.reasons.map(x => x.id).join(","); const a = addAlert("message", ids, r.level.toLowerCase(), `${r.level} risk message/link detected`, `${r.level} जोखिम वाला संदेश/लिंक मिला`, `rules=${ids}; length=${$("#msg").value.length}`, "Message analyser (text not stored)", r.next_en, r.next_hi); noteAlerts([a]); }
+  refresh();
+};
+
+/* --- QR --- */
+$("#qUpi").value = S.registered[0].upi; $("#qName").value = S.registered[0].name;
+$("#qSave").onclick = () => {
+  const upi = $("#qUpi").value.trim();
+  if (!UPI_ID_RE.test(upi)) { toast(T("UPI ID looks wrong (example: shopname@bank)", "UPI ID गलत लगती है (उदाहरण: shopname@bank)")); return; }
+  S.registered = [{label: "Main counter", upi, name: $("#qName").value.trim()}]; toast(T("Saved", "सेव हुआ"));
+};
+function showQr(payload) {
+  const r = compareQr(payload, S.registered), lvl = r.status === "MATCH" ? "low" : r.status === "UNABLE_TO_PARSE" ? "medium" : "high";
+  S.qrScans.push({ts: new Date(), status: r.status});
+  $("#qOut").innerHTML = box(lvl, `${pill(r.status.replace(/_/g, " "), lvl)}<p>${esc(T(r.en, r.hi))}</p><div class="small muted">${T("Expected", "अपेक्षित")}: ${esc(r.expected.join(", "))}<br>${T("Observed", "पाया गया")}: ${esc(r.observed || "—")}${r.observedName ? " (" + esc(r.observedName) + ")" : ""}</div>`);
+  if (r.status !== "MATCH") noteAlerts([addAlert("qr", r.status, lvl === "high" ? "high" : "medium", `QR check: ${r.status.replace(/_/g, " ")}`, `QR जाँच: ${r.status}`, `expected=${r.expected.join(",")} observed=${r.observed}`, "QR integrity check", r.en, r.hi)]);
+  refresh();
+}
+$("#qCheck").onclick = () => showQr($("#qText").value);
+$$("[data-qs]").forEach(b => b.onclick = () => { $("#qText").value = QR_SAMPLES[b.dataset.qs]; showQr(QR_SAMPLES[b.dataset.qs]); });
+function decodeImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (typeof jsQR !== "function") return reject(new Error("decoder"));
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      try {
+        for (const maxSide of [1000, 600, 1600]) {
+          const sc = Math.min(1, maxSide / Math.max(img.width, img.height)), w = Math.max(1, Math.round(img.width * sc)), h = Math.max(1, Math.round(img.height * sc));
+          const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const ctx = cv.getContext("2d", {willReadFrequently: true}); ctx.drawImage(img, 0, 0, w, h);
+          const d = ctx.getImageData(0, 0, w, h), code = jsQR(d.data, w, h, {inversionAttempts: "attemptBoth"});
+          if (code && code.data) { URL.revokeObjectURL(url); return resolve(code.data); }
+        }
+        URL.revokeObjectURL(url); resolve(null);
+      } catch (e) { reject(e); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image")); }; img.src = url;
+  });
+}
+$("#qFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (!/^image\//.test(f.type)) { toast(T("Please choose an image", "कृपया एक छवि चुनें")); return; }
+  if (f.size > 8e6) { toast(T("Image too large (8 MB max)", "छवि बहुत बड़ी है (अधिकतम 8 MB)")); return; }
+  try { const text = await decodeImageFile(f); if (text) { $("#qText").value = text; showQr(text); } else showQr(""); }
+  catch (err) { $("#qOut").innerHTML = box("medium", esc(T("The QR reader could not load. Paste the QR text instead.", "QR रीडर लोड नहीं हुआ। QR का टेक्स्ट चिपकाएँ।"))); }
+};
+
+/* --- sales --- */
+function loadDemo() {
+  const now = Date.now(); S.sales = DEMO_SALES.map(([m, a], i) => ({id: i + 1, ts: new Date(now - m * MIN), amount: a, ref: ""}));
+  const p = parseStatement(demoStatement(now)); S.txns = p; S.recon = null; S.demoRejected = p.errors.length;
+  S.qrScans = S.qrScans; toast(T("Demo sales and statement loaded", "डेमो बिक्री और स्टेटमेंट लोड हुए")); refresh();
+}
+function doRecon() {
+  if (!S.txns) { $("#salesOut").innerHTML = box("medium", esc(T("Load the demo, or choose a statement CSV first.", "पहले डेमो लोड करें, या स्टेटमेंट CSV चुनें।"))); return; }
+  if (!S.sales.length) { $("#salesOut").innerHTML = box("medium", esc(T("No sales recorded. Load the demo sales.", "कोई बिक्री दर्ज नहीं। डेमो बिक्री लोड करें।"))); return; }
+  const res = reconcile(S.sales, S.txns.rows), bad = res.summary.UNMATCHED + res.summary.AMBIGUOUS;
+  S.recon = {bad, res}; supersede("payments");
+  for (const r of res.rows) {
+    if (r.status === "UNMATCHED") noteAlerts([addAlert("payments", "P01", "high", `Possible missing payment: Rs ${r.amount.toFixed(2)} at ${fmt(r.ts)}`, `संभावित गुम भुगतान: Rs ${r.amount.toFixed(2)}, ${fmt(r.ts)}`, `sale#${r.saleId} not in statement`, "Imported statement", r.en, r.hi)]);
+    else if (r.status === "AMBIGUOUS") addAlert("payments", "P02", "medium", `Ambiguous match for Rs ${r.amount.toFixed(2)}`, `Rs ${r.amount.toFixed(2)} का मिलान अस्पष्ट`, `sale#${r.saleId} candidates=${r.candidates.join(",")}`, "Imported statement", r.en, r.hi);
+  }
+  refresh();
+}
+function renderSales() {
+  const out = $("#salesOut"); if (!S.sales.length && !S.recon) { if (!out.innerHTML) out.innerHTML = ""; return; }
+  if (!S.recon) { out.innerHTML = `<p class="small muted">${S.sales.length} ${T("sales and", "बिक्री और")} ${S.txns ? S.txns.rows.length : 0} ${T("statement rows loaded. Tap Reconcile.", "स्टेटमेंट पंक्तियाँ लोड हुईं। 'मिलान करें' दबाएँ।")}${S.demoRejected ? ` ${S.demoRejected} ${T("malformed row rejected.", "गलत पंक्ति अस्वीकृत।")}` : ""}</p>`; return; }
+  const s = S.recon.res.summary;
+  out.innerHTML = `<p class="small muted">${T("Source: imported statement", "स्रोत: आयात की गई स्टेटमेंट")} · ${T("refunds", "रिफंड")}: ${s.refunds.length} · ${T("duplicates ignored", "डुप्लिकेट अनदेखे")}: ${s.duplicates.length}</p><div class="list">` +
+    S.recon.res.rows.map(r => `<div class="item ${r.status === "MATCHED" ? "low" : r.status === "UNMATCHED" ? "high" : "medium"}"><div>${pill(r.status, r.status === "MATCHED" ? "low" : r.status === "UNMATCHED" ? "high" : "medium")} <b>Rs ${r.amount.toFixed(2)}</b> <span class="meta">${esc(hhmm(r.ts))}${r.txn ? " · " + esc(r.txn) : ""}</span></div><div class="small">${esc(T(r.en, r.hi))}</div></div>`).join("") + "</div>";
+}
+$("#loadDemo").onclick = loadDemo; $("#recon").onclick = doRecon;
+$("#csvFile").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (!/\.csv$/i.test(f.name) && f.type !== "text/csv") { toast(T("Choose a .csv file", ".csv फ़ाइल चुनें")); return; }
+  if (f.size > 1e6) { toast(T("CSV too large (1 MB max)", "CSV बहुत बड़ी है (अधिकतम 1 MB)")); return; }
+  const fr = new FileReader(); fr.onload = () => {
+    const p = parseStatement(String(fr.result)); if (!p.rows.length) { $("#salesOut").innerHTML = box("high", esc(p.errors[0]?.error || "No usable rows.")); return; }
+    S.txns = p; S.recon = null; S.demoRejected = p.errors.length;
+    if (!S.sales.length) $("#salesOut").innerHTML = box("medium", esc(T(`Imported ${p.rows.length} rows. Record or load sales, then reconcile.`, `${p.rows.length} पंक्तियाँ आयात हुईं। बिक्री दर्ज/लोड करें, फिर मिलान करें।`)));
+    else refresh();
+  }; fr.readAsText(f);
+};
+$("#vGo").onclick = () => {
+  const r = verifyStatus($("#vApp").checked, $("#vAmt").checked, $("#vTxn").checked, $("#vShot").checked);
+  $("#vOut").innerHTML = box(r.lvl, `${pill(r.status, r.lvl)}<p>${esc(T(r.en, r.hi))}</p>`);
+};
+
+/* --- code & logs --- */
+$("#scanPy").onclick = () => { $("#fName").value = "billing_app.py"; $("#fText").value = SAMPLE_PY; };
+$("#scanEnv").onclick = () => { $("#fName").value = "deploy.env"; $("#fText").value = SAMPLE_ENV; };
+$("#scanGo").onclick = () => {
+  const name = $("#fName").value.trim() || "file.txt", text = $("#fText").value;
+  if (!text.trim()) { $("#scanOut").innerHTML = box("medium", esc(T("Paste some file contents first.", "पहले फ़ाइल की सामग्री चिपकाएँ।"))); return; }
+  const f = scanText(text.slice(0, 200000), name); S.scan = {name, text, f}; supersede("secret_scan");
+  for (const x of f) if (x.severity !== "low") noteAlerts([addAlert("secret_scan", x.rule, x.severity, `${x.type} in ${name}:${x.line}`, `${name}:${x.line} में ${x.typeHi}`, `${name}:${x.line} value=${x.masked}`, "Pasted file scan", x.advice, x.adviceHi)]);
+  $("#scanOut").innerHTML = (f.length ? f.map(x => `<div class="item ${x.severity}"><div>${pill(x.severity)} <b>${esc(T(x.type, x.typeHi))}</b> <span class="meta">${esc(name)}:${x.line} · ${esc(x.rule)}</span></div><div class="mono" style="margin:4px 0;overflow-wrap:anywhere">${esc(x.masked)}</div><div class="small muted">${esc(T(x.advice, x.adviceHi))}</div>${x.fixable ? `<div class="row" style="margin-top:6px"><button class="btn sm" data-fix="${x.line}">${T("Suggest fix", "सुधार सुझाएँ")}</button></div>` : ""}</div>`).join("")
+    : `<p class="muted">${T("No configured patterns found (not a guarantee).", "कोई तय पैटर्न नहीं मिला (गारंटी नहीं)।")}</p>`) + `<div id="fixOut"></div>`;
+  refresh();
+};
+$("#logGo").onclick = () => {
+  const lines = $("#logText").value.split(/\r?\n/), ev = parseLog(lines), f = detectLogins(ev);
+  S.login = {n: ev.length}; supersede("login");
+  for (const x of f) noteAlerts([addAlert("login", x.rule, x.severity, x.en, x.hi, `source=${x.source} accounts=${x.accounts.join(",")} count=${x.count} ${x.first}..${x.last}`, "Pasted log", x.action_en, x.action_hi)]);
+  $("#logOut").innerHTML = `<p class="small muted">${ev.length} ${T("login events read from the pasted lines", "लॉगिन घटनाएँ चिपकाई पंक्तियों से पढ़ी गईं")}</p>` +
+    (f.map(x => box(x.severity, `${pill(x.severity)} <b>${esc(x.rule)}</b> · ${esc(x.source)} · ${esc(x.accounts.join(", "))}<p>${esc(T(x.en, x.hi))}</p><p class="small">${esc(T(x.action_en, x.action_hi))}</p>`)).join("") || `<p class="muted">${ev.length ? T("No threshold alert. A single failed login is not treated as an attack.", "कोई सीमा अलर्ट नहीं। अकेली विफलता को हमला नहीं माना जाता।") : T("No SSH login lines recognised. Paste lines from /var/log/auth.log.", "कोई SSH लॉगिन पंक्ति नहीं मिली। /var/log/auth.log से पंक्तियाँ चिपकाएँ।")}</p>`);
+  refresh();
+};
+$$("[data-lg]").forEach(b => b.onclick = () => { $("#logText").value = synthLines(b.dataset.lg).join("\n"); $("#logGo").click(); });
+
+/* --- factory --- */
+function tick(mode) {
+  const prev = S.tele[S.tele.length - 1], r = nextReading(prev, mode);
+  if (r) { S.tele.push(r); if (S.tele.length > 30) S.tele.shift(); S.silent = false; }
+  else { S.silent = true; if (!S.tele.length) { toast(T("Send a normal reading first", "पहले सामान्य रीडिंग भेजें")); return; } }
+  const now = r ? new Date() : new Date(S.tele[S.tele.length - 1].ts.getTime() + (HEARTBEAT_S + 5) * 1000);
+  for (const a of evalIot(S.tele, now)) noteAlerts([addAlert("factory", a.rule, a.severity, a.en, a.hi, `${a.evidence} ${pad(S.tele[S.tele.length - 1].ts.getHours())}:${pad(S.tele[S.tele.length - 1].ts.getMinutes())}:${pad(S.tele[S.tele.length - 1].ts.getSeconds())}`, "Factory simulator (SIMULATED data)", a.action_en, a.action_hi)]);
+  refresh();
+}
+function renderIot() {
+  const svg = $("#chart"), rs = S.tele, W = 640, H = 220, pd = 34;
+  const y = v => H - pd - (H - 2 * pd) * (v - 20) / 90, x = i => pd + (W - 2 * pd) * (rs.length > 1 ? i / (rs.length - 1) : 0.5);
+  const css = n => `var(${n})`;
+  let g = `<line x1="${pd}" x2="${W - pd}" y1="${y(85)}" y2="${y(85)}" stroke="${css("--hi")}" stroke-dasharray="6 5"/><text x="${W - pd}" y="${y(85) - 6}" text-anchor="end" font-size="12" fill="${css("--hi")}">85 °C limit</text>`;
+  [20, 60, 100].forEach(v => { g += `<text x="${pd - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="${css("--mut")}">${v}</text>`; });
+  if (!rs.length) g += `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="14" fill="${css("--mut")}">${esc(T("No readings yet. Tap Normal reading.", "अभी रीडिंग नहीं। 'सामान्य रीडिंग' दबाएँ।"))}</text>`;
+  else g += `<polyline fill="none" stroke="${css("--accent")}" stroke-width="2.5" points="${rs.map((r, i) => `${x(i).toFixed(1)},${y(Math.min(r.temp, 110)).toFixed(1)}`).join(" ")}"/>` + rs.map((r, i) => `<circle cx="${x(i)}" cy="${y(Math.min(r.temp, 110))}" r="3.5" fill="${r.temp > 85 ? css("--hi") : css("--accent")}"/>`).join("");
+  svg.innerHTML = g;
+  if (!rs.length) { $("#iotOut").innerHTML = ""; return; }
+  const last = rs[rs.length - 1], now = S.silent ? new Date(last.ts.getTime() + (HEARTBEAT_S + 5) * 1000) : new Date(), al = evalIot(rs, now);
+  $("#devName").textContent = `Pump-01 (SIMULATED) · ${T("last seen", "अंतिम बार")} ${pad(last.ts.getHours())}:${pad(last.ts.getMinutes())}:${pad(last.ts.getSeconds())}`;
+  $("#iotOut").innerHTML = `<p class="small muted">${T("Temperature", "तापमान")} ${last.temp} °C · ${T("vibration", "कंपन")} ${last.vib} mm/s · ${T("current", "करंट")} ${last.cur} A</p>` +
+    (al.map(a => box(a.severity, `${pill(a.severity)} <b>${esc(a.rule)}</b> ${esc(T(a.en, a.hi))}<div class="small" style="margin-top:4px">${esc(T(a.action_en, a.action_hi))}</div>`)).join("") || `<p class="muted">${T("Within configured range.", "तय सीमा के भीतर।")}</p>`);
+}
+$$("[data-tick]").forEach(b => b.onclick = () => tick(b.dataset.tick));
+let autoT = null; $("#auto").onchange = e => { clearInterval(autoT); if (e.target.checked) autoT = setInterval(() => tick("normal"), 3000); };
+
+/* --- citizen --- */
+$("#vcGo").onclick = () => {
+  const ans = {}; $$("#questions input").forEach(i => { ans[i.value] = i.checked; });
+  const r = voiceEval(ans);
+  $("#vcOut").innerHTML = box(r.level, `${pill(r.level)}<p>${esc(T(r.en, r.hi))}</p>`);
+  if (r.level === "High") noteAlerts([addAlert("voice", "V01", "high", "Possible voice-clone / emergency scam call", "संभावित वॉइस-क्लोन / इमरजेंसी ठगी कॉल", `flags=${r.flags.join(",")}`, "Citizen checklist (no call audio used)", r.en, r.hi)]);
+  refresh();
+};
+
+/* --- global --- */
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]"); if (g) { go(g.dataset.go); return; }
+  const a = e.target.closest("[data-ack]"); if (a) { const x = S.alerts.find(z => z.id === +a.dataset.ack); if (x) x.ack = true; refresh(); return; }
+  const f = e.target.closest("[data-fix]"); if (f && S.scan) {
+    const p = proposeFix(S.scan.text, +f.dataset.fix);
+    $("#fixOut").innerHTML = p ? box("medium", `<b>${T("Proposed change (nothing was changed)", "प्रस्तावित बदलाव (कुछ बदला नहीं गया)")}</b><pre class="diff">${esc(p.diff)}</pre><p class="small">${esc(T(`After applying, set ${p.env} in your environment and rotate the old key; it stays in your file history. The Linux version applies a fix only after your approval and keeps a backup.`, `लागू करने के बाद ${p.env} अपने पर्यावरण में सेट करें और पुरानी कुंजी बदलें; वह फ़ाइल इतिहास में रहती है। Linux संस्करण आपकी मंज़ूरी के बाद ही सुधार लागू करता है और बैकअप रखता है।`))}</p>`) : box("medium", esc(T("This line is not a simple assignment; follow the manual advice.", "यह सरल असाइनमेंट नहीं है; दी गई सलाह मानें।")));
+  }
+});
+$("#fSev").onchange = refresh; $("#fOpen").onchange = refresh;
+$("#copyCsv").onclick = async () => {
+  const q = v => { v = String(v ?? ""); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+  const csv = ["id,time,module,rule,severity,title,evidence,source,acknowledged", ...S.alerts.map(a => [a.id, fmt(a.ts), a.module, a.rule, a.severity, a.titleEn, a.evidence, a.source, a.ack].map(q).join(","))].join("\n");
+  try { await navigator.clipboard.writeText(csv); toast(T("Copied", "कॉपी हुआ")); }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = csv; ta.className = "mono"; $("#alertList").before(ta); ta.select(); toast(T("Select and copy the text", "टेक्स्ट चुनकर कॉपी करें")); }
+};
+$("#langBtn").onclick = () => { LANG = LANG === "en" ? "hi" : "en"; try { localStorage.setItem("ss_lang", LANG); } catch (e) {} applyLang(); };
+$("#voiceBtn").onclick = () => { S.voice = !S.voice; $("#voiceBtn").setAttribute("aria-pressed", S.voice); if (S.voice) speak("high"); };
+$("#runAll").onclick = () => {
+  loadDemo(); $("#qOut").innerHTML = ""; showQr(QR_SAMPLES.swapped); doRecon();
+  $("#fName").value = "billing_app.py"; $("#fText").value = SAMPLE_PY; $("#scanGo").click();
+  $("#logText").value = synthLines("brute").join("\n"); $("#logGo").click();
+  S.tele = []; ["normal", "normal", "overheat", "overheat", "overheat"].forEach(m => tick(m));
+  toast(T("Demo checks done. See the alerts.", "डेमो जाँच पूरी। अलर्ट देखें।")); refresh();
+};
+$("#resetAll").onclick = () => {
+  S.alerts = []; S.nid = 1; S.qrScans = []; S.sales = []; S.txns = null; S.recon = null; S.scan = null; S.login = null; S.tele = []; S.silent = false;
+  ["#msgOut", "#qOut", "#salesOut", "#vOut", "#scanOut", "#logOut", "#vcOut"].forEach(s => { $(s).innerHTML = ""; }); toast(T("Reset", "रीसेट हुआ")); refresh();
+};
+window.addEventListener("hashchange", () => go((location.hash || "#overview").slice(1), false));
+window.__ss = {analyzeMsg, analyzeUrl, compareQr, parseStatement, reconcile, scanText, parseLog, detectLogins, evalIot, voiceEval, verifyStatus, demoStatement};
+applyLang(); go((location.hash || "#overview").slice(1), false);
+})();
+</script>

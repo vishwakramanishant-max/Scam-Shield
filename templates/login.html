@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scam Shield</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth">
+<main class="auth-card">
+  <h1>🛡️ Scam Shield</h1>
+  <p class="muted">{% if mode == 'setup' %}First run: create the owner account for this computer.{% else %}Sign in to your safety dashboard.{% endif %}</p>
+  {% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <label>Username <input name="username" autocomplete="username" required></label>
+    <label>Password <input name="password" type="password" autocomplete="{{ 'new-password' if mode == 'setup' else 'current-password' }}" required minlength="8"></label>
+    <button class="btn primary" type="submit">{{ 'Create account' if mode == 'setup' else 'Sign in' }}</button>
+  </form>
+  <p class="muted small">Local-first: your data stays on this computer. Use a new password; never your bank or UPI password.</p>
+</main>
+</body>
+</html>

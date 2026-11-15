@@ -1,0 +1,16 @@
+# Install as a *user* service (never root):
+#   mkdir -p ~/.config/systemd/user && cp scam-shield-worker.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now scam-shield-worker
+# Edit WorkingDirectory to where you unpacked the project.
+[Unit]
+Description=Scam Shield background worker (folder scan + login monitor)
+
+[Service]
+WorkingDirectory=%h/scam_shield
+ExecStart=%h/scam_shield/venv/bin/python worker.py --interval 60
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

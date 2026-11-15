@@ -1,0 +1,2 @@
+Ordinary notes: the password reset flow sends an email.
+token = <your-token-here>

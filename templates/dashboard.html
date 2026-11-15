@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf" content="{{ csrf }}">
+<title>Scam Shield</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <div class="brand">🛡️ Scam Shield <span class="tag" data-en="Detect · Explain · Recommend · Record" data-hi="पहचानें · समझाएँ · सुझाएँ · दर्ज करें"></span></div>
+  <div class="tools">
+    <button class="btn small" id="langBtn" aria-label="Switch language">हिंदी</button>
+    <label class="switch small"><input type="checkbox" id="voiceOn"> <span data-en="Voice alerts" data-hi="आवाज़ अलर्ट"></span></label>
+    <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ csrf }}"><button class="btn small" data-en="Log out" data-hi="लॉग आउट"></button></form>
+  </div>
+</header>
+
+<nav class="nav" id="nav">
+  <button data-go="overview" class="on" data-en="Overview" data-hi="सारांश"></button>
+  <button data-go="messages" data-en="Messages & Links" data-hi="संदेश और लिंक"></button>
+  <button data-go="qr" data-en="QR & Payments" data-hi="QR और भुगतान"></button>
+  <button data-go="linux" data-en="Linux Guard" data-hi="Linux गार्ड"></button>
+  <button data-go="factory" data-en="Factory (simulated)" data-hi="फ़ैक्टरी (सिम्युलेटेड)"></button>
+  <button data-go="citizen" data-en="Citizen Safety" data-hi="नागरिक सुरक्षा"></button>
+  <button data-go="alerts" data-en="Alerts & History" data-hi="अलर्ट और इतिहास"></button>
+</nav>
+
+<main>
+<!-- OVERVIEW -->
+<section id="overview" class="panel show">
+  <div class="grid2">
+    <div class="card">
+      <h2 data-en="Readiness indicator" data-hi="तैयारी संकेतक"></h2>
+      <p id="overall" class="big"></p>
+      <table class="tbl" id="components"></table>
+      <p class="muted small" id="readyNote"></p>
+    </div>
+    <div class="card">
+      <h2 data-en="Run everything" data-hi="सब कुछ चलाएँ"></h2>
+      <p class="muted" data-en="Demo data is synthetic: dummy QR codes, fake keys, made-up transactions and a simulated machine." data-hi="डेमो डेटा नकली है: डमी QR, नकली कुंजियाँ, बनावटी लेन-देन और सिम्युलेटेड मशीन।"></p>
+      <div class="row">
+        <button class="btn primary" id="loadDemo" data-en="Load demo data" data-hi="डेमो डेटा लोड करें"></button>
+        <button class="btn" id="runAll" data-en="Run all automatic checks" data-hi="सभी स्वचालित जाँच चलाएँ"></button>
+        <button class="btn danger" id="resetDemo" data-en="Reset demo" data-hi="डेमो रीसेट"></button>
+      </div>
+      <div class="stats"><div><b id="openHigh">0</b><span data-en="open high alerts" data-hi="खुले गंभीर अलर्ट"></span></div><div><b id="openTotal">0</b><span data-en="open alerts" data-hi="खुले अलर्ट"></span></div></div>
+      <p id="runMsg" class="muted small" role="status"></p>
+    </div>
+  </div>
+  <div class="card"><h2 data-en="Latest alerts" data-hi="ताज़ा अलर्ट"></h2><div id="latest"></div></div>
+</section>
+
+<!-- MESSAGES -->
+<section id="messages" class="panel">
+  <div class="card">
+    <h2 data-en="Check a message, payment request or link" data-hi="संदेश, भुगतान अनुरोध या लिंक जाँचें"></h2>
+    <p class="muted small" data-en="Paste text only. It is analysed on this computer and the text itself is not stored." data-hi="केवल टेक्स्ट चिपकाएँ। विश्लेषण इसी कंप्यूटर पर होता है और टेक्स्ट सेव नहीं होता।"></p>
+    <textarea id="msgText" rows="5" maxlength="5000" placeholder="Paste SMS / WhatsApp text or a link here"></textarea>
+    <div class="row">
+      <button class="btn primary" id="analyzeBtn" data-en="Analyse" data-hi="जाँचें"></button>
+      <button class="btn" id="sampleScam" data-en="Insert sample scam" data-hi="नमूना ठगी संदेश"></button>
+      <button class="btn" id="sampleOk" data-en="Insert sample genuine" data-hi="नमूना असली संदेश"></button>
+    </div>
+    <div id="msgResult"></div>
+  </div>
+  <div class="card">
+    <h2 data-en="Check an app file (APK)" data-hi="ऐप फ़ाइल (APK) जाँचें"></h2>
+    <p class="muted small" data-en="Metadata only. The file is never installed or run." data-hi="केवल मेटाडेटा। फ़ाइल कभी इंस्टॉल या चलाई नहीं जाती।"></p>
+    <input type="file" id="apkFile" accept=".apk,.zip">
+    <button class="btn" id="apkBtn" data-en="Review file" data-hi="फ़ाइल जाँचें"></button>
+    <div id="apkResult"></div>
+  </div>
+</section>
+
+<!-- QR & PAYMENTS -->
+<section id="qr" class="panel">
+  <div class="grid2">
+    <div class="card">
+      <h2 data-en="1. Register your real QR" data-hi="1. अपना असली QR पंजीकृत करें"></h2>
+      <div class="form">
+        <input id="qLabel" placeholder="Label (e.g. Main counter)" maxlength="40">
+        <input id="qUpi" placeholder="UPI ID (shopname@bank)" maxlength="100">
+        <input id="qName" placeholder="Payee name shown in app" maxlength="80">
+        <button class="btn primary" id="qAdd" data-en="Save" data-hi="सेव करें"></button>
+      </div>
+      <div id="qList"></div>
+    </div>
+    <div class="card">
+      <h2 data-en="2. Scan a QR to compare" data-hi="2. तुलना के लिए QR स्कैन करें"></h2>
+      <input type="file" id="qFile" accept="image/png,image/jpeg">
+      <div class="row">
+        <button class="btn primary" id="qScanFile" data-en="Check image" data-hi="छवि जाँचें"></button>
+        <button class="btn" id="qCam" data-en="Use camera" data-hi="कैमरा उपयोग करें"></button>
+      </div>
+      <video id="qVideo" class="hidden" playsinline muted></video>
+      <textarea id="qPayload" rows="2" placeholder="…or paste the QR text, e.g. upi://pay?pa=…"></textarea>
+      <button class="btn" id="qScanText" data-en="Check pasted text" data-hi="चिपकाया टेक्स्ट जाँचें"></button>
+      <div id="qResult"></div>
+      <h3 data-en="Recent scans" data-hi="हाल के स्कैन"></h3><div id="qHist"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2 data-en="3. Record sales" data-hi="3. बिक्री दर्ज करें"></h2>
+      <div class="form"><input id="sAmt" type="number" step="0.01" min="0" placeholder="Amount (Rs)"><input id="sRef" placeholder="Reference (optional)" maxlength="40">
+        <button class="btn primary" id="sAdd" data-en="Add sale" data-hi="बिक्री जोड़ें"></button></div>
+      <div id="sList"></div>
+    </div>
+    <div class="card">
+      <h2 data-en="4. Import statement &amp; reconcile" data-hi="4. स्टेटमेंट आयात करें और मिलान करें"></h2>
+      <p class="muted small" data-en="CSV columns: txn_id,timestamp,amount,status[,reference]. The result only says what the imported file contains." data-hi="CSV कॉलम: txn_id,timestamp,amount,status[,reference]। नतीजा सिर्फ़ यह बताता है कि आयात की फ़ाइल में क्या है।"></p>
+      <input type="file" id="csvFile" accept=".csv">
+      <div class="row"><button class="btn" id="csvImport" data-en="Import CSV" data-hi="CSV आयात करें"></button>
+        <button class="btn primary" id="reconRun" data-en="Reconcile now" data-hi="अभी मिलान करें"></button></div>
+      <div id="reconResult"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-en="5. Customer shows a 'payment successful' screen" data-hi="5. ग्राहक 'भुगतान सफल' स्क्रीन दिखाता है"></h2>
+    <label class="chk"><input type="checkbox" id="vApp"> <span data-en="I see the credit inside MY official payment app / bank SMS" data-hi="मैं अपने आधिकारिक पेमेंट ऐप / बैंक SMS में क्रेडिट देख रहा/रही हूँ"></span></label>
+    <label class="chk"><input type="checkbox" id="vAmt"> <span data-en="Amount matches the sale" data-hi="राशि बिक्री से मेल खाती है"></span></label>
+    <label class="chk"><input type="checkbox" id="vTxn"> <span data-en="Transaction ID seen in my app" data-hi="लेन-देन ID मेरे ऐप में दिखी"></span></label>
+    <label class="chk"><input type="checkbox" id="vShot"> <span data-en="I only have the customer's screenshot" data-hi="मेरे पास सिर्फ़ ग्राहक का स्क्रीनशॉट है"></span></label>
+    <button class="btn primary" id="vBtn" data-en="Get status" data-hi="स्थिति देखें"></button>
+    <div id="vResult"></div>
+  </div>
+</section>
+
+<!-- LINUX -->
+<section id="linux" class="panel">
+  <div class="card">
+    <h2 data-en="Code &amp; data leak scan" data-hi="कोड और डेटा लीक स्कैन"></h2>
+    <p class="muted small" data-en="Scans only allowed folders. Secret values are always masked in results." data-hi="केवल अनुमत फ़ोल्डर स्कैन होते हैं। नतीजों में गुप्त मान हमेशा छिपे रहते हैं।"></p>
+    <button class="btn primary" id="scanBtn" data-en="Scan folder" data-hi="फ़ोल्डर स्कैन करें"></button>
+    <p id="scanMeta" class="muted small"></p>
+    <div id="scanResult"></div>
+    <div id="fixBox"></div>
+  </div>
+  <div class="card">
+    <h2 data-en="Failed-login monitor" data-hi="असफल लॉगिन निगरानी"></h2>
+    <p class="muted small" data-en="Reads the Linux auth log when permitted; otherwise uses a clearly labelled synthetic demo log. Demo buttons only write fake lines to that demo log." data-hi="अनुमति होने पर Linux auth लॉग पढ़ता है; वरना साफ़ लेबल वाला नकली डेमो लॉग। डेमो बटन केवल उसी डेमो लॉग में नकली पंक्तियाँ लिखते हैं।"></p>
+    <div class="row">
+      <button class="btn primary" id="loginRun" data-en="Check logins now" data-hi="अभी लॉगिन जाँचें"></button>
+      <button class="btn" data-sim="brute" data-en="Demo: repeated failures" data-hi="डेमो: बार-बार विफलता"></button>
+      <button class="btn" data-sim="spray" data-en="Demo: many accounts" data-hi="डेमो: कई खाते"></button>
+      <button class="btn" data-sim="success_after" data-en="Demo: success after failures" data-hi="डेमो: विफलता के बाद सफल"></button>
+      <button class="btn" data-sim="benign" data-en="Demo: one typo (harmless)" data-hi="डेमो: एक गलती (हानिरहित)"></button>
+    </div>
+    <div id="loginResult"></div>
+  </div>
+</section>
+
+<!-- FACTORY -->
+<section id="factory" class="panel">
+  <div class="card">
+    <div class="banner" data-en="SIMULATED DATA. Alerts only — this prototype can never control or stop a machine." data-hi="सिम्युलेटेड डेटा। केवल अलर्ट — यह प्रोटोटाइप किसी मशीन को नियंत्रित या बंद नहीं कर सकता।"></div>
+    <h2 id="devName">Pump-01 (SIMULATED)</h2>
+    <div class="row">
+      <button class="btn" data-tick="normal" data-en="Normal reading" data-hi="सामान्य रीडिंग"></button>
+      <button class="btn" data-tick="overheat" data-en="Inject overheating" data-hi="अधिक गर्मी डालें"></button>
+      <button class="btn" data-tick="vibration" data-en="Inject vibration" data-hi="कंपन डालें"></button>
+      <button class="btn" data-tick="heartbeat_loss" data-en="Device goes silent" data-hi="डिवाइस शांत"></button>
+      <label class="switch small"><input type="checkbox" id="autoTick"> <span data-en="Auto-stream normal data" data-hi="सामान्य डेटा स्वतः भेजें"></span></label>
+    </div>
+    <svg id="chart" viewBox="0 0 900 230" role="img" aria-label="Temperature chart"></svg>
+    <div id="iotAlerts"></div>
+    <table class="tbl" id="iotTable"></table>
+  </div>
+</section>
+
+<!-- CITIZEN -->
+<section id="citizen" class="panel">
+  <div class="card">
+    <h2 data-en="Suspicious family-emergency or voice call?" data-hi="संदिग्ध पारिवारिक इमरजेंसी या वॉइस कॉल?"></h2>
+    <p class="muted" id="consent"></p>
+    <ol id="steps" class="steps"></ol>
+    <h3 data-en="Quick self-check (tick what applies)" data-hi="त्वरित स्व-जाँच (जो लागू हो चुनें)"></h3>
+    <div id="questions"></div>
+    <button class="btn primary" id="voiceCheck" data-en="Check" data-hi="जाँचें"></button>
+    <div id="voiceResult"></div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section id="alerts" class="panel">
+  <div class="card">
+    <h2 data-en="Alerts & history" data-hi="अलर्ट और इतिहास"></h2>
+    <div class="row">
+      <select id="fMod"><option value="">All modules</option><option>message</option><option>qr</option><option>payments</option><option>secret_scan</option><option>login</option><option>factory</option><option>voice</option><option>apk</option></select>
+      <select id="fSev"><option value="">All severities</option><option>high</option><option>medium</option><option>low</option></select>
+      <select id="fSt"><option value="">All</option><option value="open">Open only</option></select>
+      <a class="btn" href="/api/export/alerts.csv" data-en="Export CSV" data-hi="CSV निर्यात"></a>
+    </div>
+    <div id="alertList"></div>
+  </div>
+</section>
+</main>
+<footer class="foot muted small" data-en="Scam Shield is a decision-support tool. It gives risk indicators, not proof. It does not intercept calls or messages, confirm bank settlement, or control machinery." data-hi="Scam Shield निर्णय-सहायक उपकरण है। यह जोखिम संकेत देता है, सबूत नहीं। यह कॉल या संदेश नहीं रोकता, बैंक निपटान की पुष्टि नहीं करता, और मशीनें नियंत्रित नहीं करता।"></footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
