@@ -144,7 +144,7 @@ flowchart LR
 
 `web/index.html` is a **single-file** version of the dashboard that runs entirely in the browser. Nothing is uploaded or stored.
 
-- Open the GitHub Pages link: `https://YOUR-USERNAME.github.io/scam-shield/web/`
+- Open the GitHub Pages link: `https://vishwakramanishant-max.github.io/Scam-Shield/`
 - Or open `web/index.html` directly in any browser.
 
 Folder scanning, the real login log, the background worker and the APK check are Linux-only. In the phone version you paste a file or log lines, or use the sample buttons.
