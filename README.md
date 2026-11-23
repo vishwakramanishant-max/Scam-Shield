@@ -18,7 +18,7 @@ A local-first, **Linux-based** cyber-safety dashboard that protects shops, famil
 
 [Features](#-features) · [How it works](#-how-it-works) · [Run it](#-run-the-linux-app) · [Phone version](#-try-it-on-your-phone) · [Results](#-tests-and-measured-results) · [Limits](#-honest-limits)
 
-<img src="docs/img/overview_en.png" alt="Scam Shield dashboard" width="860">
+<img src="docs/img/overview_en.png" alt="Scam Shield Command Center: status cards, readiness ring, alerts by area and latest alerts" width="900">
 
 </div>
 
@@ -129,6 +129,8 @@ flowchart LR
 
 ## 📸 Screenshots
 
+A dark command-center layout that adapts from a phone to a laptop. All data shown is synthetic.
+
 <table>
 <tr>
 <td width="50%"><b>QR integrity and payments</b><br><img src="docs/img/qr.png" alt="QR and payments"></td>
@@ -140,9 +142,16 @@ flowchart LR
 </tr>
 </table>
 
+<table>
+<tr>
+<td width="62%"><b>Phone version on a laptop screen</b><br><img src="docs/img/phone_laptop.png" alt="Phone version using the full laptop width"></td>
+<td width="38%"><b>Phone version on a phone</b><br><img src="docs/img/phone.png" alt="Phone version on a 390px screen"></td>
+</tr>
+</table>
+
 ## 📱 Try it on your phone
 
-`web/index.html` is a **single-file** version of the dashboard that runs entirely in the browser. Nothing is uploaded or stored.
+`web/index.html` is a **single-file** version of the dashboard that runs entirely in the browser. Nothing is uploaded or stored. The layout adapts: one column on a phone, a multi-column dashboard on a laptop.
 
 - Open the GitHub Pages link: `https://vishwakramanishant-max.github.io/Scam-Shield/`
 - Or open `web/index.html` directly in any browser.
