@@ -1,29 +1,18 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Scam Shield: spot the scam before the money moves. Message, link and QR checks, payment reconciliation, code and login scans, simulated factory alerts. English and Hindi.">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
 <title>Scam Shield</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;600&family=Space+Grotesk:wght@600;700&display=swap">
 <style>
 /* Layout: sticky header + scrolling tab strip, one card stack per tab, built for a thumb on a 390px screen.
    Palette: pine-green accent on a green-grey neutral; severity colours are separate from the accent. */
 :root{
-  --bg:#F1F5F3;--surface:#FFFFFF;--ink:#12201D;--mut:#55665F;--line:#D9E2DD;--accent:#0B6B5D;--accent-ink:#FFFFFF;
-  --hi:#B42318;--hib:#FDE7E4;--me:#9A4405;--meb:#FDEFD2;--lo:#0A6B3F;--lob:#DCF4E5;--un:#475467;--unb:#E8ECEA;
-  --code:#0F1A17;--code-ink:#DCEBE5;
+  --bg:#0a0e14;--surface:#0f161e;--surface2:#131c27;--ink:#e6edf3;--mut:#8b98a8;--line:#1e2a37;--accent:#3b82f6;--accent2:#22d3ee;--pri:#6d5dfc;--accent-ink:#FFFFFF;
+  --hi:#f87171;--hib:#3a1a1f;--me:#fbbf24;--meb:#3a2d0f;--lo:#34d399;--lob:#0f2e25;--un:#9aa7b6;--unb:#1a2430;
+  --code:#070b10;--code-ink:#cfe3f5;color-scheme:dark;
   --f-body:"Inter","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-head:"Space Grotesk","Noto Sans Devanagari",system-ui,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0C1412;--surface:#141F1C;--ink:#E7F1ED;--mut:#9BAEA7;--line:#26352F;--accent:#43C4AC;--accent-ink:#052019;
-  --hi:#FF9187;--hib:#3A1815;--me:#F4B862;--meb:#3A2B11;--lo:#74DCA5;--lob:#12301F;--un:#AAB7C0;--unb:#222C30;
-  --code:#091210;--code-ink:#CFE3DB;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0C1412;--surface:#141F1C;--ink:#E7F1ED;--mut:#9BAEA7;--line:#26352F;--accent:#43C4AC;--accent-ink:#052019;
-  --hi:#FF9187;--hib:#3A1815;--me:#F4B862;--meb:#3A2B11;--lo:#74DCA5;--lob:#12301F;--un:#AAB7C0;--unb:#222C30;
-  --code:#091210;--code-ink:#CFE3DB;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
@@ -80,10 +69,53 @@ pre.diff{background:var(--code);color:var(--code-ink);border-radius:10px;padding
 svg.chart{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;margin:10px 0}
 .foot{margin-top:6px;font-size:12px;color:var(--mut)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:600;font-size:13px;z-index:40;max-width:90vw}
+
+/* ---- command-center skin ---- */
+.card{background:linear-gradient(180deg,var(--surface2),var(--surface));border-radius:16px}
+nav.tabs{border-bottom:0;padding:10px 0 8px}
+nav.tabs button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13.5px}
+nav.tabs button[aria-selected="true"]{background:#1b4f93;border-color:#2d6cc0;color:#fff}
+.btn.primary{background:var(--pri);border-color:var(--pri);color:#fff}
+.chip[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:#fff}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.kpi .l{font:600 11px/1.3 var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.kpi .v{font:700 20px/1.2 var(--f-head);margin:6px 0 2px;display:flex;align-items:center;gap:8px;overflow-wrap:anywhere}
+.kpi .s{font-size:12px;color:var(--mut)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--un)}
+.d-ok{background:var(--lo)}.d-warn{background:var(--me)}.d-bad{background:var(--hi)}.d-idle{background:#2b3a4a}
+.ringrow{display:flex;gap:16px;align-items:center}
+.ring-wrap{position:relative;width:132px;height:132px;flex:none}
+.ring-wrap svg{width:100%;height:100%}
+.ring-c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-c b{font:700 28px/1 var(--f-head)}.ring-c span{font-size:11px;color:var(--mut)}
+.legend{display:grid;gap:6px;font-size:13px;min-width:0;flex:1}
+.legend div{display:flex;align-items:center;gap:8px;min-width:0}.legend span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.next{border:1px solid #2d3f7a;background:#111a33;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13.5px}
+.next small{display:block;color:var(--mut);margin-top:4px}
+.bars svg{width:100%;max-width:420px;height:auto;display:block}
+.kpi .s.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+#latest .item{padding:8px 11px}
+#latest .item>*:nth-child(n+4){display:none}
+@media (min-width:900px){
+  .wrap{max-width:1240px}
+  body{font-size:15.5px}
+  .panel{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
+  .panel>.kpis,.panel>.note,.panel>.wide{grid-column:1/-1}
+  .kpi .v{font-size:24px}
+  .ring-wrap{width:160px;height:160px}
+  #p-overview{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #p-overview>.card:nth-of-type(5){grid-column:1/-1}
+  #p-overview>.card:nth-of-type(3){grid-column:2;grid-row:2/4}
+  #p-overview>.card:nth-of-type(2){grid-column:1;grid-row:2}
+  #p-overview>.card:nth-of-type(4){grid-column:3;grid-row:2/4}
+  #p-overview #latest{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #p-messages>.card,#p-factory>.card:first-child{grid-column:1/-1}
+}
+@media (min-width:1500px){.wrap{max-width:1400px}}
 @media (prefers-reduced-motion:no-preference){.panel{animation:in .18s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}}}
 </style>
-</head>
-<body>
 
 <div class="wrap">
 <header class="top">
@@ -103,21 +135,29 @@ svg.chart{width:100%;height:auto;background:var(--bg);border:1px solid var(--lin
 <main>
 <!-- OVERVIEW -->
 <section class="panel" id="p-overview">
-  <div class="card">
-    <h2 data-en="Readiness" data-hi="तैयारी"></h2>
-    <div id="overall"></div>
-    <div id="components"></div>
-    <p class="small muted" data-en="Built only from checks you have run. A check that has not run shows Not assessed. It is not a claim that the business is secure." data-hi="केवल उन जाँचों से बनता है जो आपने चलाई हैं। जो जाँच नहीं चली उसे 'आकलन नहीं' दिखता है। यह सुरक्षित होने का दावा नहीं है।"></p>
+  <div class="kpis">
+    <div class="kpi"><div class="l" data-en="Status" data-hi="स्थिति"></div><div class="v"><i class="dot" id="kDot"></i><span id="kStatus">—</span></div><div class="s" id="kStatusSub"></div></div>
+    <div class="kpi"><div class="l" data-en="Open alerts" data-hi="खुले अलर्ट"></div><div class="v"><span id="nAll">0</span></div><div class="s"><span id="nHigh">0</span> <span data-en="high" data-hi="गंभीर"></span></div></div>
+    <div class="kpi"><div class="l" data-en="Checks run" data-hi="चली जाँचें"></div><div class="v"><span id="kRun">0/5</span></div><div class="s" id="kRunSub"></div></div>
+    <div class="kpi"><div class="l" data-en="Latest alert" data-hi="ताज़ा अलर्ट"></div><div class="v"><span id="kLast">—</span></div><div class="s ell" id="kLastSub"></div></div>
   </div>
   <div class="card">
     <h2 data-en="Try it in one tap" data-hi="एक टैप में आज़माएँ"></h2>
-    <p class="muted" data-en="Demo data is made up: sample QR text, fake keys, invented sales and a simulated machine. Nothing leaves your phone." data-hi="डेमो डेटा बनावटी है: नमूना QR टेक्स्ट, नकली कुंजियाँ, बनावटी बिक्री और सिम्युलेटेड मशीन। कुछ भी आपके फ़ोन से बाहर नहीं जाता।"></p>
+    <p class="muted small" data-en="Demo data is made up: sample QR text, fake keys, invented sales and a simulated machine. Nothing leaves your phone." data-hi="डेमो डेटा बनावटी है: नमूना QR टेक्स्ट, नकली कुंजियाँ, बनावटी बिक्री और सिम्युलेटेड मशीन। कुछ भी आपके फ़ोन से बाहर नहीं जाता।"></p>
     <div class="row">
       <button class="btn primary" id="runAll" data-en="Run all demo checks" data-hi="सभी डेमो जाँच चलाएँ"></button>
       <button class="btn warn" id="resetAll" data-en="Reset" data-hi="रीसेट"></button>
     </div>
-    <div class="stat"><div><b id="nHigh">0</b><span data-en="open high alerts" data-hi="खुले गंभीर अलर्ट"></span></div><div><b id="nAll">0</b><span data-en="open alerts" data-hi="खुले अलर्ट"></span></div></div>
   </div>
+  <div class="card">
+    <h2 data-en="Readiness" data-hi="तैयारी"></h2>
+    <div class="ringrow"><div class="ring-wrap"><div id="ring"></div><div class="ring-c"><b id="ringNum">0/5</b><span data-en="healthy" data-hi="ठीक"></span></div></div><div class="legend" id="legend"></div></div>
+    <div id="overall"></div>
+    <div id="components"></div>
+    <p class="small muted" data-en="Built only from checks you have run. A check that has not run shows Not assessed. It is not a claim that the business is secure." data-hi="केवल उन जाँचों से बनता है जो आपने चलाई हैं। जो जाँच नहीं चली उसे 'आकलन नहीं' दिखता है। यह सुरक्षित होने का दावा नहीं है।"></p>
+  </div>
+  <div class="card"><h2 data-en="Alerts by area" data-hi="क्षेत्र के अनुसार अलर्ट"></h2><div class="bars" id="bars"></div>
+    <div class="next" id="next"></div></div>
   <div class="card"><h2 data-en="Latest alerts" data-hi="ताज़ा अलर्ट"></h2><div class="list" id="latest"></div></div>
   <div class="note" data-en="This web version runs every check inside your browser on sample or pasted data. The Linux version scans real folders and the real login log in the background, and also reviews app (APK) files." data-hi="यह वेब संस्करण हर जाँच आपके ब्राउज़र में नमूना या चिपकाए डेटा पर चलाता है। Linux संस्करण असली फ़ोल्डर और असली लॉगिन लॉग को बैकग्राउंड में जाँचता है और ऐप (APK) फ़ाइलें भी देखता है।"></div>
 </section>
@@ -758,11 +798,31 @@ function alertItem(a, ack = true) {
 }
 function refresh() {
   const r = readiness();
-  $("#overall").innerHTML = `<p style="margin:2px 0 8px">${pill(r.overall, r.overall === "Action needed" ? "high" : r.overall === "Incomplete" ? "medium" : "low")} <span class="small muted">${r.healthy}/${r.C.length} ${T("checks healthy", "जाँच ठीक")}</span></p>`;
+  const CLS = {Verified:"ok",Clean:"ok",Monitoring:"ok",Reviewed:"ok","Not assessed":"idle","Review needed":"warn",Incomplete:"warn","Action needed":"bad",Alert:"bad"};
+  const COL = {ok:"var(--lo)",warn:"var(--me)",bad:"var(--hi)",idle:"#2b3a4a"};
+  $("#overall").innerHTML = `<p style="margin:10px 0 4px">${pill(r.overall, r.overall === "Action needed" ? "high" : r.overall === "Incomplete" ? "medium" : "low")} <span class="small muted">${r.healthy}/${r.C.length} ${T("checks healthy", "जाँच ठीक")}</span></p>`;
   $("#components").innerHTML = r.C.map(c => `<div class="comp"><div><b>${esc(T(c.n, c.nh))}</b><div class="d">${esc(T(c.d, c.dh))}</div></div>${pill(c.state, c.state === "Verified" || c.state === "Clean" || c.state === "Monitoring" || c.state === "Reviewed" ? "low" : c.state === "Not assessed" ? "unk" : c.state === "Alert" || c.state === "Action needed" ? "high" : "medium")}</div>`).join("");
-  const open = S.alerts.filter(a => !a.ack);
-  $("#nHigh").textContent = open.filter(a => a.severity === "high").length; $("#nAll").textContent = open.length;
-  $("#latest").innerHTML = open.slice(0, 4).map(a => alertItem(a, false)).join("") || `<p class="muted">${T("No open alerts. Run the demo checks to see some.", "कोई खुला अलर्ट नहीं। देखने के लिए डेमो जाँच चलाएँ।")}</p>`;
+  const open = S.alerts.filter(a => !a.ack), nHigh = open.filter(a => a.severity === "high").length;
+  $("#nHigh").textContent = nHigh; $("#nAll").textContent = open.length;
+  const run = r.C.filter(c => c.state !== "Not assessed").length, st = CLS[r.overall] || "idle";
+  $("#kStatus").textContent = LANG === "hi" && HI[r.overall] ? HI[r.overall] : r.overall; $("#kDot").className = "dot d-" + st;
+  $("#kStatusSub").textContent = `${r.healthy}/${r.C.length} ${T("checks healthy", "जाँच ठीक")}`;
+  $("#kRun").textContent = `${run}/${r.C.length}`; $("#kRunSub").textContent = run ? T("on sample or pasted data", "नमूना या चिपकाए डेटा पर") : T("none run yet", "अभी कोई नहीं");
+  const la = open[0];
+  $("#kLast").textContent = la ? hhmm(la.ts) : "—"; $("#kLastSub").textContent = la ? T(la.titleEn, la.titleHi) : T("no open alerts", "कोई खुला अलर्ट नहीं");
+  // readiness ring: one arc per check, coloured by state (no percentage)
+  const n = r.C.length, R = 52, CX = 66, CIRC = 2 * Math.PI * R, gap = 5, seg = CIRC / n - gap;
+  $("#ring").innerHTML = `<svg viewBox="0 0 132 132" role="img" aria-label="${r.healthy}/${n}">` + r.C.map((c, k) => `<circle cx="${CX}" cy="${CX}" r="${R}" fill="none" stroke="${COL[CLS[c.state] || "idle"]}" stroke-width="13" stroke-dasharray="${seg} ${CIRC - seg}" stroke-dashoffset="${-k * (CIRC / n)}" transform="rotate(-90 ${CX} ${CX})"/>`).join("") + `</svg>`;
+  $("#ringNum").textContent = `${r.healthy}/${n}`;
+  $("#legend").innerHTML = r.C.map(c => `<div><i class="dot d-${CLS[c.state] || "idle"}"></i><span class="t">${esc(T(c.n, c.nh))}</span></div>`).join("");
+  // alerts by area
+  const areas = {}; open.forEach(a => { areas[a.module] = (areas[a.module] || 0) + 1; });
+  const rows = Object.entries(areas).sort((x, y) => y[1] - x[1]), mx = Math.max(1, ...rows.map(x => x[1]));
+  $("#bars").innerHTML = rows.length ? `<svg viewBox="0 0 320 ${rows.length * 26}">` + rows.map(([m, c], k) => `<text x="0" y="${k * 26 + 15}" fill="#8b98a8" font-size="12">${esc(m)}</text><rect x="110" y="${k * 26 + 4}" width="${Math.round(170 * c / mx)}" height="13" rx="4" fill="url(#bg)"/><text x="${116 + Math.round(170 * c / mx)}" y="${k * 26 + 15}" fill="#e6edf3" font-size="12" font-weight="600">${c}</text>`).join("") + `<defs><linearGradient id="bg"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs></svg>` : `<p class="muted small">${T("No open alerts yet.", "अभी कोई खुला अलर्ट नहीं।")}</p>`;
+  // rule-based next step (not AI)
+  const bad = r.C.find(c => CLS[c.state] === "bad") || r.C.find(c => CLS[c.state] === "warn"), idle = r.C.find(c => c.state === "Not assessed");
+  $("#next").innerHTML = `<b>${T("Suggested next step", "सुझाया अगला कदम")}</b><br>` + (bad ? esc(T("Review: ", "देखें: ") + T(bad.n, bad.nh) + " — " + T(bad.d, bad.dh)) : idle ? esc(T("Run: ", "चलाएँ: ") + T(idle.n, idle.nh)) : esc(T("All checks run are healthy. Re-run after any change.", "चली सभी जाँचें ठीक हैं। बदलाव के बाद दोबारा चलाएँ।"))) + `<small>${T("Rule-based suggestion, not AI.", "नियम-आधारित सुझाव, AI नहीं।")}</small>`;
+  $("#latest").innerHTML = open.slice(0, 3).map(a => alertItem(a, false)).join("") || `<p class="muted">${T("No open alerts. Run the demo checks to see some.", "कोई खुला अलर्ट नहीं। देखने के लिए डेमो जाँच चलाएँ।")}</p>`;
   const sev = $("#fSev").value, op = $("#fOpen").value;
   $("#alertList").innerHTML = S.alerts.filter(a => (!sev || a.severity === sev) && (!op || !a.ack)).map(a => alertItem(a)).join("") || `<p class="muted">${T("No alerts match.", "कोई अलर्ट नहीं।")}</p>`;
   renderSales(); renderIot();
@@ -960,5 +1020,5 @@ window.__ss = {analyzeMsg, analyzeUrl, compareQr, parseStatement, reconcile, sca
 applyLang(); go((location.hash || "#overview").slice(1), false);
 })();
 </script>
-</body>
-</html>
+
+</body></html>

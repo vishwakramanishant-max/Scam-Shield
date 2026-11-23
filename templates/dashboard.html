@@ -9,7 +9,16 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand">🛡️ Scam Shield <span class="tag" data-en="Detect · Explain · Recommend · Record" data-hi="पहचानें · समझाएँ · सुझाएँ · दर्ज करें"></span></div>
+  <div class="brand"><span class="mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.900 7.500-9.500V6L12 3Z"/><path d="m8.800 12 2.400 2.400 4.200-4.600"/></svg></span><span>Scam Shield<small data-en="Detect · Explain · Recommend · Record" data-hi="पहचानें · समझाएँ · सुझाएँ · दर्ज करें"></small></span></div>
+  <nav class="nav" id="nav" aria-label="Sections">
+    <button data-go="overview" class="on" data-en="Command Center" data-hi="कमांड सेंटर"></button>
+    <button data-go="messages" data-en="Messages & Links" data-hi="संदेश और लिंक"></button>
+    <button data-go="qr" data-en="QR & Payments" data-hi="QR और भुगतान"></button>
+    <button data-go="linux" data-en="Linux Guard" data-hi="Linux गार्ड"></button>
+    <button data-go="factory" data-en="Factory" data-hi="फ़ैक्टरी"></button>
+    <button data-go="citizen" data-en="Citizen Safety" data-hi="नागरिक सुरक्षा"></button>
+    <button data-go="alerts" data-en="Alerts" data-hi="अलर्ट"></button>
+  </nav>
   <div class="tools">
     <button class="btn small" id="langBtn" aria-label="Switch language">हिंदी</button>
     <label class="switch small"><input type="checkbox" id="voiceOn"> <span data-en="Voice alerts" data-hi="आवाज़ अलर्ट"></span></label>
@@ -17,39 +26,51 @@
   </div>
 </header>
 
-<nav class="nav" id="nav">
-  <button data-go="overview" class="on" data-en="Overview" data-hi="सारांश"></button>
-  <button data-go="messages" data-en="Messages & Links" data-hi="संदेश और लिंक"></button>
-  <button data-go="qr" data-en="QR & Payments" data-hi="QR और भुगतान"></button>
-  <button data-go="linux" data-en="Linux Guard" data-hi="Linux गार्ड"></button>
-  <button data-go="factory" data-en="Factory (simulated)" data-hi="फ़ैक्टरी (सिम्युलेटेड)"></button>
-  <button data-go="citizen" data-en="Citizen Safety" data-hi="नागरिक सुरक्षा"></button>
-  <button data-go="alerts" data-en="Alerts & History" data-hi="अलर्ट और इतिहास"></button>
-</nav>
-
 <main>
 <!-- OVERVIEW -->
 <section id="overview" class="panel show">
-  <div class="grid2">
-    <div class="card">
-      <h2 data-en="Readiness indicator" data-hi="तैयारी संकेतक"></h2>
-      <p id="overall" class="big"></p>
-      <table class="tbl" id="components"></table>
-      <p class="muted small" id="readyNote"></p>
+  <div class="toolbar">
+    <div>
+      <h1 data-en="Command Center" data-hi="कमांड सेंटर"></h1>
+      <p class="muted small" id="runMsg" role="status" data-en="Demo data is synthetic: dummy QR codes, fake keys, made-up transactions and a simulated machine." data-hi="डेमो डेटा नकली है: डमी QR, नकली कुंजियाँ, बनावटी लेन-देन और सिम्युलेटेड मशीन।"></p>
     </div>
-    <div class="card">
-      <h2 data-en="Run everything" data-hi="सब कुछ चलाएँ"></h2>
-      <p class="muted" data-en="Demo data is synthetic: dummy QR codes, fake keys, made-up transactions and a simulated machine." data-hi="डेमो डेटा नकली है: डमी QR, नकली कुंजियाँ, बनावटी लेन-देन और सिम्युलेटेड मशीन।"></p>
-      <div class="row">
-        <button class="btn primary" id="loadDemo" data-en="Load demo data" data-hi="डेमो डेटा लोड करें"></button>
-        <button class="btn" id="runAll" data-en="Run all automatic checks" data-hi="सभी स्वचालित जाँच चलाएँ"></button>
-        <button class="btn danger" id="resetDemo" data-en="Reset demo" data-hi="डेमो रीसेट"></button>
-      </div>
-      <div class="stats"><div><b id="openHigh">0</b><span data-en="open high alerts" data-hi="खुले गंभीर अलर्ट"></span></div><div><b id="openTotal">0</b><span data-en="open alerts" data-hi="खुले अलर्ट"></span></div></div>
-      <p id="runMsg" class="muted small" role="status"></p>
+    <div class="row">
+      <button class="btn" id="loadDemo" data-en="Load demo data" data-hi="डेमो डेटा लोड करें"></button>
+      <button class="btn primary" id="runAll" data-en="Run all automatic checks" data-hi="सभी स्वचालित जाँच चलाएँ"></button>
+      <button class="btn danger" id="resetDemo" data-en="Reset demo" data-hi="डेमो रीसेट"></button>
     </div>
   </div>
-  <div class="card"><h2 data-en="Latest alerts" data-hi="ताज़ा अलर्ट"></h2><div id="latest"></div></div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="lbl"><span data-en="Overall status" data-hi="कुल स्थिति"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.500 6v5.500c0 4.600 3.200 8.400 7.500 9.500 4.300-1.100 7.500-4.900 7.500-9.500V6L12 3Z"/></svg></div>
+      <div class="val idle" id="kStatus">…</div><div class="sub" id="kStatusSub"></div></div>
+    <div class="kpi"><div class="lbl"><span data-en="Open alerts" data-hi="खुले अलर्ट"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.900 1.900 0 0 0 3.400 0"/></svg></div>
+      <div class="val idle" id="openTotal">0</div><div class="sub"><span class="hot"><span id="openHigh">0</span> <span data-en="high" data-hi="गंभीर"></span></span> · <span data-en="needs a human look" data-hi="इंसानी नज़र ज़रूरी"></span></div></div>
+    <div class="kpi"><div class="lbl"><span data-en="Checks run" data-hi="चली जाँचें"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.500 12 2.500 2.500 4.500-5"/></svg></div>
+      <div class="val idle" id="kRun">0/5</div><div class="sub" id="kRunSub"></div></div>
+    <div class="kpi"><div class="lbl"><span data-en="Latest open alert" data-hi="ताज़ा खुला अलर्ट"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="val idle" id="kLast">None</div><div class="sub" id="kLastSub"></div></div>
+  </div>
+
+  <div class="panels3">
+    <div class="card">
+      <div class="ph"><h2 data-en="Readiness" data-hi="तैयारी"></h2><span id="overall"></span></div>
+      <div class="ring-wrap"><svg id="ring" viewBox="0 0 200 200" role="img" aria-label="Readiness by check"></svg><div class="ring-c"><b id="ringNum">0/5</b><span data-en="checks healthy" data-hi="जाँच ठीक"></span></div></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="card">
+      <div class="ph"><h2 data-en="Open alerts by area" data-hi="क्षेत्र के अनुसार खुले अलर्ट"></h2></div>
+      <div class="bars" id="bars"></div>
+      <div class="next" id="next"></div>
+    </div>
+    <div class="card"><div class="ph"><h2 data-en="Latest alerts" data-hi="ताज़ा अलर्ट"></h2></div><div id="latest"></div></div>
+  </div>
+
+  <div class="card">
+    <h2 data-en="Checks and findings" data-hi="जाँच और निष्कर्ष"></h2>
+    <table class="tbl" id="components"></table>
+    <p class="muted small" id="readyNote"></p>
+  </div>
 </section>
 
 <!-- MESSAGES -->

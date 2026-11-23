@@ -71,19 +71,65 @@ function alertRow(a, withAck = true) {
 }
 
 /* ---------- overview ---------- */
+const STATE_CLS = {'Verified': 'ok', 'Clean': 'ok', 'Monitoring': 'ok', 'Reviewed': 'ok', 'Not assessed': 'idle', 'Stale': 'warn', 'Incomplete': 'warn', 'Review needed': 'warn', 'Action needed': 'bad', 'Alert': 'bad'};
+const CLS_COLOR = {ok: 'var(--lo)', warn: 'var(--me)', bad: 'var(--hi)', idle: 'var(--line2)'};
+const MODULE_NAME = {message: ['Messages', 'संदेश'], qr: ['QR check', 'QR जाँच'], payments: ['Payments', 'भुगतान'], secret_scan: ['Code scan', 'कोड स्कैन'], login: ['Logins', 'लॉगिन'], factory: ['Factory', 'फ़ैक्टरी'], voice: ['Voice call', 'वॉइस कॉल'], apk: ['App file', 'ऐप फ़ाइल']};
+const SEV_RANK = {high: 3, medium: 2, low: 1};
+function ringSvg(comps) {
+  const n = Math.max(comps.length, 1), cx = 100, cy = 100, r = 78, gap = 6, seg = 360 / n;
+  const pt = deg => { const a = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+  return comps.map((c, i) => {
+    const a0 = i * seg + gap / 2, a1 = (i + 1) * seg - gap / 2, [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+    return `<path d="M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}" fill="none" stroke="${CLS_COLOR[STATE_CLS[c.state] || 'idle']}" stroke-width="14" stroke-linecap="round"/>`;
+  }).join('');
+}
+function barsSvg(rows, max) {
+  const W = 320, rowH = 30;
+  return `<svg viewBox="0 0 ${W} ${rows.length * rowH}" width="100%" role="img" aria-label="${esc(T('Open alerts by area', 'क्षेत्र के अनुसार खुले अलर्ट'))}">` + rows.map((x, i) => {
+    const y = i * rowH, w = Math.max(6, Math.round(180 * x.n / max)), col = x.sev === 'high' ? 'var(--hi)' : x.sev === 'medium' ? 'var(--me)' : 'var(--lo)';
+    return `<text x="0" y="${y + 18}" font-size="12.5" fill="var(--ink)">${esc(x.name)}</text><rect x="96" y="${y + 8}" width="190" height="9" rx="4.5" fill="var(--bg2)" stroke="var(--line)"/><rect x="96" y="${y + 8}" width="${w}" height="9" rx="4.5" fill="${col}"/><text x="${W}" y="${y + 18}" font-size="12.5" font-weight="600" text-anchor="end" fill="var(--ink)">${x.n}</text>`;
+  }).join('') + '</svg>';
+}
 async function refreshOverview() {
   const r = await api('/api/readiness');
   if (!r.ok) return;
-  const label = {'Action needed': 'कार्रवाई ज़रूरी', 'Incomplete': 'अधूरा', 'All configured checks healthy': 'सभी तय जाँच ठीक'};
-  $('#overall').innerHTML = `${badge(r.overall, r.overall)} <span class="small muted">${r.healthy}/${r.total} ${T('checks healthy', 'जाँच ठीक')}</span>`;
+  const a = await api('/api/alerts?status=open');
+  const open = a.alerts || [];
+  // KPI: overall status
+  const cls = r.overall === 'Action needed' ? 'bad' : r.overall === 'Incomplete' ? 'warn' : 'ok';
+  const overallTxt = r.overall === 'All configured checks healthy' ? T('All healthy', 'सब ठीक') : (LANG === 'hi' && HI[r.overall] ? HI[r.overall] : r.overall);
+  $('#kStatus').textContent = overallTxt; $('#kStatus').className = 'val ' + cls;
+  $('#kStatusSub').textContent = `${r.healthy}/${r.total} ${T('checks healthy', 'जाँच ठीक')}`;
+  $('#overall').innerHTML = badge(r.overall, r.overall);
+  // KPI: checks run
+  const ran = r.components.filter(c => c.state !== 'Not assessed').length;
+  $('#kRun').textContent = `${ran}/${r.total}`; $('#kRun').className = 'val ' + (ran === r.total ? 'ok' : ran === 0 ? 'idle' : 'warn');
+  $('#kRunSub').textContent = ran === r.total ? T('Every check has run', 'हर जाँच चल चुकी है') : `${r.total - ran} ${T('not assessed yet', 'का आकलन बाकी')}`;
+  // readiness ring + legend
+  $('#ring').innerHTML = ringSvg(r.components); $('#ringNum').textContent = `${r.healthy}/${r.total}`;
+  $('#legend').innerHTML = r.components.map(c => { const k = STATE_CLS[c.state] || 'idle'; return `<div title="${esc(T(c.detail, c.detail_hi))}"><span><i class="d-${k}"></i>${esc(T(c.name_en, c.name_hi))}</span>${badge(c.state, c.state)}</div>`; }).join('');
+  // table
   $('#components').innerHTML = `<tr><th>${T('Check', 'जाँच')}</th><th>${T('State', 'स्थिति')}</th><th>${T('Detail', 'विवरण')}</th></tr>` +
     r.components.map(c => `<tr><td>${esc(T(c.name_en, c.name_hi))}</td><td>${badge(c.state, c.state)}</td><td>${esc(T(c.detail, c.detail_hi))}</td></tr>`).join('');
   $('#readyNote').textContent = r.note;
   $('#openHigh').textContent = r.open_high; $('#openTotal').textContent = r.open_total;
+  $('#openTotal').className = 'val ' + (r.open_high > 0 ? 'bad' : r.open_total > 0 ? 'warn' : 'idle');
   if (r.open_high > lastHigh) speak('High');
   lastHigh = r.open_high;
-  const a = await api('/api/alerts?status=open');
-  $('#latest').innerHTML = (a.alerts || []).slice(0, 5).map(x => alertRow(x, false)).join('') || `<p class="muted">${T('No open alerts.', 'कोई खुला अलर्ट नहीं।')}</p>`;
+  // KPI: latest alert
+  if (open.length) { const x = open[0]; $('#kLast').textContent = (x.ts || '').slice(11, 16) || '-'; $('#kLast').className = 'val idle'; $('#kLastSub').textContent = T(x.title_en, x.title_hi); }
+  else { $('#kLast').textContent = T('None', 'कोई नहीं'); $('#kLast').className = 'val idle'; $('#kLastSub').textContent = T('Nothing open right now', 'अभी कुछ खुला नहीं'); }
+  // bars by module
+  const mods = {};
+  open.forEach(x => { const m = mods[x.module] || (mods[x.module] = {n: 0, sev: 'low'}); m.n++; if ((SEV_RANK[x.severity] || 0) > SEV_RANK[m.sev]) m.sev = x.severity; });
+  const rows = Object.entries(mods).map(([k, v]) => ({name: T(...(MODULE_NAME[k] || [k, k])), n: v.n, sev: v.sev})).sort((p, q) => q.n - p.n).slice(0, 6);
+  $('#bars').innerHTML = rows.length ? barsSvg(rows, Math.max(...rows.map(x => x.n))) : `<div class="empty">${T('No open alerts. Run the checks to see results here.', 'कोई खुला अलर्ट नहीं। नतीजे देखने के लिए जाँच चलाएँ।')}</div>`;
+  // rule-based next step: highest-severity, newest open alert
+  const top = open.slice().sort((p, q) => (SEV_RANK[q.severity] || 0) - (SEV_RANK[p.severity] || 0) || q.id - p.id)[0];
+  $('#next').innerHTML = `<b>${T('Suggested next step (rule-based)', 'सुझाया अगला कदम (नियम-आधारित)')}</b>` +
+    (top ? `${esc(T(top.title_en, top.title_hi))}: ${esc(T(top.action_en, top.action_hi))}` :
+      esc(ran < r.total ? T('Run all automatic checks to fill in the "Not assessed" items.', '"आकलन नहीं" वाली जाँचें भरने के लिए सभी स्वचालित जाँच चलाएँ।') : T('Nothing needs attention right now. This is not a guarantee.', 'अभी किसी चीज़ पर ध्यान ज़रूरी नहीं। यह गारंटी नहीं है।')));
+  $('#latest').innerHTML = open.slice(0, 5).map(x => alertRow(x, false)).join('') || `<p class="muted">${T('No open alerts.', 'कोई खुला अलर्ट नहीं।')}</p>`;
 }
 function refreshAll() { refreshOverview(); loadQR(); loadSales(); }
 
@@ -223,11 +269,15 @@ $$('[data-sim]').forEach(b => b.onclick = async () => { await api('/api/logins/s
 /* ---------- factory ---------- */
 function drawChart(rows) {
   const svg = $('#chart'); const W = 900, H = 230, pad = 34;
-  if (!rows.length) { svg.innerHTML = `<text x="450" y="115" text-anchor="middle" fill="#5d6881">${T('No data yet', 'अभी डेटा नहीं')}</text>`; return; }
+  if (!rows.length) { svg.innerHTML = `<text x="450" y="115" text-anchor="middle" fill="var(--mut)">${T('No data yet', 'अभी डेटा नहीं')}</text>`; return; }
   const ymin = 20, ymax = 110, x = i => pad + (W - 2 * pad) * (rows.length > 1 ? i / (rows.length - 1) : 0), y = v => H - pad - (H - 2 * pad) * (v - ymin) / (ymax - ymin);
   const pts = rows.map((r, i) => `${x(i).toFixed(1)},${y(r.temp).toFixed(1)}`).join(' ');
-  svg.innerHTML = `<line x1="${pad}" x2="${W - pad}" y1="${y(85)}" y2="${y(85)}" stroke="#b42318" stroke-dasharray="5 4"/><text x="${W - pad}" y="${y(85) - 4}" text-anchor="end" font-size="11" fill="#b42318">85 °C limit</text>
-  <polyline fill="none" stroke="#2f55c9" stroke-width="2.5" points="${pts}"/>` + rows.map((r, i) => `<circle cx="${x(i)}" cy="${y(r.temp)}" r="3" fill="${r.temp > 85 ? '#b42318' : '#2f55c9'}"/>`).join('');
+  const area = `${x(0).toFixed(1)},${H - pad} ${pts} ${x(rows.length - 1).toFixed(1)},${H - pad}`;
+  const grid = [20, 50, 80, 110].map(v => `<line x1="${pad}" x2="${W - pad}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pad - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--mut)">${v}</text>`).join('');
+  svg.innerHTML = `<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee" stop-opacity=".35"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></linearGradient></defs>${grid}
+  <line x1="${pad}" x2="${W - pad}" y1="${y(85)}" y2="${y(85)}" stroke="var(--hi)" stroke-dasharray="5 4"/><text x="${W - pad}" y="${y(85) - 5}" text-anchor="end" font-size="11" fill="var(--hi)">85 °C limit</text>
+  <polygon points="${area}" fill="url(#ga)"/><polyline fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linejoin="round" points="${pts}"/>` +
+    rows.map((r, i) => `<circle cx="${x(i)}" cy="${y(r.temp)}" r="3.5" fill="${r.temp > 85 ? 'var(--hi)' : '#22d3ee'}"/>`).join('');
 }
 function renderIoT(r) {
   if (!r.assessed) { drawChart([]); $('#iotAlerts').innerHTML = ''; $('#iotTable').innerHTML = ''; return; }
